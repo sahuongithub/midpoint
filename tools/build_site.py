@@ -40,8 +40,24 @@ def build_data():
     paired = [{"a": t["A"]["cost"], "b": t["B"]["cost"],
                "diff": round(t["B"]["cost"] - t["A"]["cost"], 4)}
               for t in pa.get("trials", [])]
+    # results that the appendix reports as numbers rather than as interactions.
+    # Embedded so the page never quotes a figure that is not in the repository.
+    mp = load("microprice_study.json") or {}
+    micro = {"n": mp.get("n"),
+             "rmse_mid": (mp.get("dollars") or {}).get("rmse_mid"),
+             "rmse_micro": (mp.get("dollars") or {}).get("rmse_micro"),
+             "p": (mp.get("paired_test") or {}).get("p"),
+             "verdict": mp.get("verdict")} if mp else {}
+    oc = load("opportunity_cost.json") or {}
+    refusals = {"evaluations": oc.get("evaluations"), "refusals": oc.get("refusals"),
+                "settled": oc.get("settled"), "pending": oc.get("pending"),
+                "net": oc.get("net_effect_of_refusing_usd"),
+                "saved": oc.get("saved_usd"), "cost": oc.get("cost_usd"),
+                "by_gate": oc.get("by_gate", {})} if oc else {}
+    sc = load("spread_curve_summary.json") or {}
     return {"contracts": contracts, "oracle": oracle, "paired": paired,
-            "summary": pa.get("summary", {})}
+            "summary": pa.get("summary", {}),
+            "micro": micro, "refusals": refusals, "spread_curve": sc}
 
 
 def main():
@@ -65,6 +81,15 @@ def main():
     print("built docs/index.html  %.0f KB" % kb)
     print("  %d contracts with ground truth" % len(data["contracts"]))
     print("  %d oracle probes, %d paired trials" % (len(data["oracle"]), len(data["paired"])))
+    if data.get("micro", {}).get("n"):
+        print("  microprice study: n=%d, mid %.4f vs micro %.4f"
+              % (data["micro"]["n"], data["micro"]["rmse_mid"], data["micro"]["rmse_micro"]))
+    r = data.get("refusals") or {}
+    if r.get("refusals"):
+        print("  refusal ledger: %d refusals, %d settled, net $%s"
+              % (r["refusals"], r.get("settled") or 0, r.get("net")))
+    if data.get("spread_curve", {}).get("samples"):
+        print("  spread curve: %d samples" % data["spread_curve"]["samples"])
     costs = [c["cost"] for c in data["contracts"]]
     print("  cost range $%.0f to $%.0f" % (min(costs), max(costs)))
     if kb > 900:

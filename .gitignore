@@ -12,3 +12,10 @@ __pycache__/
 *.pyc
 .DS_Store
 bin/alpaca
+
+# source texts used for research are third-party copyrighted works: never published
+research/
+# operational logs from scheduled runs
+ops/logs/
+# local settlement lookups
+results/settlement_cache.json

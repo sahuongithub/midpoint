@@ -219,6 +219,52 @@ footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
 </section>
 
 <section>
+  <div class="eyebrow">01b — where that gap actually goes</div>
+  <h2>You are paying three different people</h2>
+  <p class="lede" style="margin-top:14px;max-width:37em">The gap is not a fee somebody set. It is the sum of
+  three separate charges, and knowing which is which tells you when the gap is fair and when you are being
+  quoted a price nobody expects you to take.</p>
+
+  <div class="stack" style="margin-top:26px">
+    <div class="card plain">
+      <h3>1. The dealer's costs</h3>
+      <p class="small" style="margin-top:10px">Somebody has to be standing there, willing to trade with you at
+      2:14pm on a Tuesday, in a contract that might trade eleven times all day. That readiness costs money —
+      staff, exchange fees, capital — and the spread pays for it. In a competitive market this part shrinks to
+      roughly what the business costs to run.</p>
+    </div>
+    <div class="card plain">
+      <h3>2. The risk of holding what you sold them</h3>
+      <p class="small" style="margin-top:10px">When they buy from you they are stuck holding it until someone
+      turns up wanting the other side. Every minute of that is risk. The less often a contract trades, the longer
+      that wait, and the wider the quote. This is why the illiquid strike one row down costs so much more than the
+      busy one — nothing about your trade changed, only how long they expect to be stuck with it.</p>
+    </div>
+    <div class="card plain">
+      <h3>3. Insurance against people who know more than you</h3>
+      <p class="small" style="margin-top:10px">Some of the people hitting that quote know something. The dealer
+      cannot tell which ones, so they charge everybody a premium to cover what they lose to the informed few.
+      This is the uncomfortable part: <b>you pay that premium even though you are almost certainly not the
+      informed one.</b> It is the price of being in the same queue as them.</p>
+    </div>
+  </div>
+
+  <div class="notice" style="margin-top:22px">The practical consequence is the whole point of this project.
+  Parts 2 and 3 are enormous in thinly traded options and small in busy ones — and they are visible <em>before
+  you trade</em>, in the width of the quote. That is a gate you can apply yourself, and it is the one our agent
+  applies below.</div>
+
+  <details><summary>Where this comes from</summary><div class="inner">
+    The split into a cost component and an adverse-selection component is standard microstructure: Harris,
+    <i>Trading and Exchanges</i> (2003), ch. 14, and the models of Glosten &amp; Milgrom (1985) and Kyle (1985),
+    set out in Cartea, Jaimungal &amp; Penalva, <i>Algorithmic and High-Frequency Trading</i> (2015), ch. 2.
+    The half-spread a dealer must charge rises with both the <em>prevalence</em> of informed traders and the
+    <em>size</em> of what they know; push either far enough and the quote widens until nobody sane trades, which
+    is exactly the shape of the $110-wide quotes our liquidity gate refuses.
+  </div></details>
+</section>
+
+<section>
   <div class="eyebrow">02 — the centrepiece</div>
   <h2>Pick a strike. See the bill.</h2>
   <p class="lede" style="margin-top:14px;max-width:36em">Every bar below is a real contract we bought and sold
@@ -269,6 +315,46 @@ footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
       <div class="notice" id="twNote">SPY's own spread that afternoon was three cents. A hundred shares cost <b>$3</b> to get in and out of.</div>
     </div>
   </div>
+</section>
+
+<section>
+  <div class="eyebrow">03b — two myths worth killing first</div>
+  <h2>Things that sound true and aren't</h2>
+
+  <div class="stack" style="margin-top:24px">
+    <div class="card">
+      <h3>"Selling spreads generates income. Buying them is a gamble."</h3>
+      <p class="small" style="margin-top:10px">These are the same trade. A put spread where you sell the higher
+      strike and buy the lower one, taking cash in, has an identical payoff at expiry to the call spread on the
+      same two strikes that you pay to put on. Same maximum win, same maximum loss, same breakeven, same
+      underlying price at every point. Only the direction the cash moves on day one differs, and put–call parity
+      forces the two to cost the same once you account for it.</p>
+      <p class="small" style="margin-top:10px">Getting paid up front feels like income. It is not income; it is
+      a loan against a liability you have just taken on. The reason we still use the credit form is unglamorous:
+      it puts the wider, busier strike on the side we are selling, which is where the liquidity is.</p>
+    </div>
+
+    <div class="card">
+      <h3>"A resting limit order is the safe way to trade."</h3>
+      <p class="small" style="margin-top:10px">A limit order sitting in the book is a free option you have
+      written and given to the market. You have promised to trade at your price; anyone may take that promise
+      whenever it suits them. When the news is good for the other side, they take it. When it is bad for them,
+      they leave it there. Your only protection is cancelling faster than they can act — and against a machine,
+      you cannot.</p>
+      <p class="small" style="margin-top:10px">This is why the professional advice is the opposite of the folk
+      advice: use limit orders sparingly, priced close to the market, mainly where your size would otherwise move
+      the price. Our agent crosses the spread deliberately and prices the crossing, rather than resting far away
+      and pretending patience is free.</p>
+    </div>
+  </div>
+
+  <details><summary>Where this comes from</summary><div class="inner">
+    The equivalence is put–call parity applied to verticals: Hull, <i>Options, Futures, and Other Derivatives</i>,
+    ch. 10–11. The free-option characterisation of resting limit orders is Grinold &amp; Kahn,
+    <i>Active Portfolio Management</i> (2000), ch. 16 — "placing a limit order to buy at a price P constitutes
+    offering to buy the stock at P, even if the stock is rapidly moving to 80 percent of P" — and the reason it
+    is dangerous is the adverse-selection charge described two sections above.
+  </div></details>
 </section>
 
 <section>
@@ -482,6 +568,30 @@ footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
         <tr><td class="n">(c)(1)(iii)</td><td>Regulatory compliance before entry</td><td>uncovered shorts unrepresentable, expiry cutoffs, account guard</td></tr>
         <tr><td class="n">(c)(2)</td><td>Immediate post-trade surveillance</td><td>every decision journalled with its reason</td></tr>
         </tbody></table></div>
+      <p class="small" style="margin-top:14px">The gates also have a second lineage, which is the list of ways
+      derivatives desks have actually destroyed themselves. Hull devotes a closing chapter to it, and the lessons
+      map onto this system one for one:</p>
+      <div class="tw" style="margin-top:12px"><table>
+        <thead><tr><th>Lesson from the disasters</th><th>How it is enforced here</th></tr></thead>
+        <tbody>
+          <tr><td>Define risk limits at board level, then convert them into limits on individuals</td>
+              <td>Every threshold lives in one config, serialised and hashed into the pre-registration before the first order</td></tr>
+          <tr><td>Take the limits seriously — the penalty for breaching a limit must be the same when the breach makes money</td>
+              <td>The kernel has no override path. Vetoes of trades that would have profited are journalled and reported alongside the rest</td></tr>
+          <tr><td>Do not assume you can outguess the market: one trader in sixteen is right four quarters running by chance</td>
+              <td>The agent claims no forecasting edge. The regime signal can only withhold permission, never size a bet</td></tr>
+          <tr><td>Do not blindly trust models — large profits from simple strategies usually mean the model is wrong</td>
+              <td>The fill oracle exists because we did not trust the simulator's prices, and went and measured them</td></tr>
+          <tr><td>Separate the front, middle and back office</td>
+              <td>The agent proposes, the kernel vetoes and can only veto, the hash-chained journal and broker reconciliation record — three separate pieces of code</td></tr>
+          <tr><td>Barings and Société Générale: an arbitrage mandate quietly became a directional bet</td>
+              <td>Structure is fixed in code. The model may abstain or shrink; it cannot choose strikes, expiries, or direction</td></tr>
+        </tbody></table></div>
+      <p class="tiny" style="margin-top:10px">Hull, <i>Options, Futures, and Other Derivatives</i>, ch. 35.
+      The separation-of-duties point is the one worth stressing: Leeson controlled both the front and back office
+      at Barings, and Kerviel had worked in Société Générale's back office before becoming a trader. An agent that
+      both places orders and writes its own record of them has the same structural flaw.</p>
+
       <p class="small" style="margin-top:14px"><b>The clause that shaped the design is (c)(1)(ii).</b> Its
       erroneous-order controls exist to catch <em>your own system malfunctioning</em>, not the market moving.
       Retail risk management is almost entirely about market risk; professional pre-trade risk assumes your own
@@ -525,6 +635,113 @@ footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
       Commit <span class="mono">bac24e3</span>.</p>
     </div>
 
+    <div class="card">
+      <h3>The arithmetic of proving an edge in five sessions</h3>
+      <p class="small" style="margin-top:10px">This is the calculation that decided what this project would try
+      to be. Active management has a standard formula for how much skill a strategy can express — the fundamental
+      law, <span class="mono">IR ≈ IC · √BR</span>: your information ratio is your skill per decision multiplied
+      by the square root of the number of <em>independent</em> decisions you make. Breadth is the lever, and it is
+      the one a short evaluation window takes away.</p>
+      <p class="small" style="margin-top:10px">An agent trading one strategy on one underlying over five sessions
+      makes on the order of five independent bets — not fifty, because the same regime call repeated daily is one
+      bet made five times, not five bets. Even at a skill level most professionals never reach, five bets cannot
+      produce a distinguishable result. And the standard error of an information ratio is roughly
+      <span class="mono">1/√years</span>: establishing merely top-quartile skill at conventional confidence takes
+      <b>about sixteen years of returns</b>. A five-day P&amp;L number is not weak evidence of skill. It is no
+      evidence of skill.</p>
+      <p class="small" style="margin-top:10px">So we moved the breadth to where it exists on this timescale.
+      Measurement has breadth: 65 contracts probed for the liquidity gate, 40 paired quote comparisons for the
+      feed audit, 240 samples for the fair-value study, 10 matched pairs for the timing test, 10,000 randomised
+      cases against the risk kernel. Those are questions a week can actually answer. The trading result is
+      reported honestly and claimed for nothing.</p>
+      <div class="tw" style="margin-top:16px"><table>
+        <thead><tr><th>Quantity</th><th>Value here</th><th>What it implies</th></tr></thead>
+        <tbody>
+          <tr><td>Independent bets in the window (BR)</td><td class="n">~5</td><td>√BR ≈ 2.2</td></tr>
+          <tr><td>Signal-to-noise of the P&amp;L, pre-registered</td><td class="n">≈0.11</td><td>P&amp;L indistinguishable from zero</td></tr>
+          <tr><td>Years to establish IR = 0.5 at t = 2</td><td class="n">16</td><td>SE(IR) ≈ 1/√years</td></tr>
+          <tr><td>Chance one of 20 dead strategies backtests at t ≥ 2</td><td class="n">64%</td><td>why the rules were hashed first</td></tr>
+        </tbody></table></div>
+      <p class="tiny" style="margin-top:12px">Grinold &amp; Kahn, <i>Active Portfolio Management</i> (2000),
+      ch. 5–6, 12, 17. The 64% figure is theirs: given twenty informationless strategies, the probability that at
+      least one shows a t-statistic of 2 is 64%, which is why a backtest that survived a search is worth so much
+      less than it looks.</p>
+    </div>
+
+    <div class="card">
+      <h3>What the refusals cost — the number nobody else reports</h3>
+      <p class="small" style="margin-top:10px">Risk systems are judged on the trades they stop, and almost nobody
+      prices them. The reason is structural: transaction-cost analysis is built from executed orders, so it can
+      only ever see the trades that happened. Grinold &amp; Kahn call the rest censored data — "the record shows
+      trades, not orders placed, and certainly not orders not placed because the cost would be too high" — and
+      Wagner's studies of institutional desks found the opportunity cost of trades never made often <em>dominates</em>
+      every cost that is measured. Harris lists missed-trade opportunity cost as one of the three components of
+      transaction cost, and the hardest to see.</p>
+      <p class="small" style="margin-top:10px">So a refusal log that records only the reason cannot answer the one
+      question worth asking of a risk system: did the refusals help? Every veto in this system now carries the
+      quotes, strikes and credit it refused, and each one is settled afterwards against where the underlying
+      actually closed. For a defined-risk spread held to expiry that needs no model at all — the result is fixed
+      by one number:</p>
+      <p class="small mono" style="margin-top:10px;padding:12px;background:var(--paper2, rgba(0,0,0,.03));border-radius:8px">
+      P&amp;L per share = credit − max(0, K<sub>short</sub> − S<sub>T</sub>) + max(0, K<sub>long</sub> − S<sub>T</sub>)</p>
+      <p class="small" style="margin-top:10px">Refusals that would have lost money are money the gate saved.
+      Refusals that would have made money are the gate's cost, and we report those with the same prominence.
+      The arithmetic is verified against hand calculations in
+      <span class="mono">tools/test_opportunity_cost.py</span>; the ledger is
+      <span class="mono">results/opportunity_cost.json</span>. With a handful of refusals it is descriptive, not
+      inferential, and it is labelled that way.</p>
+    </div>
+
+    <div class="card">
+      <h3>A second null: the size-weighted mid does not beat the plain mid here</h3>
+      <p class="small" style="margin-top:10px">Standard practice in equity microstructure is that the
+      <em>microprice</em> — the mid weighted by the size resting on each side —
+      <span class="mono">(V<sub>bid</sub>·P<sub>ask</sub> + V<sub>ask</sub>·P<sub>bid</sub>) / (V<sub>bid</sub>+V<sub>ask</sub>)</span>
+      — is a better estimate of the true price than the plain mid, because it leans toward the side that is
+      thinner and therefore likelier to be consumed next. Nobody appears to have checked it on retail options
+      quotes, because checking it requires the true NBBO and the free feed does not publish one. We had 64
+      contracts where we had bought the truth.</p>
+      <div class="tw" style="margin-top:16px"><table>
+        <thead><tr><th>Sample</th><th>n</th><th>RMSE, plain mid</th><th>RMSE, microprice</th><th>paired p</th></tr></thead>
+        <tbody>
+          <tr><td>All probed contracts</td><td class="n">64</td><td class="n">$0.1406</td><td class="n">$0.2289</td><td class="n">0.30</td></tr>
+          <tr><td>Excluding the single widest quote</td><td class="n">63</td><td class="n">$0.1417</td><td class="n">$0.1439</td><td class="n">0.73</td></tr>
+          <tr><td>Contracts our gate would trade (≤$0.20 wide)</td><td class="n">48</td><td class="n">$0.0790</td><td class="n">$0.0816</td><td class="n">0.15</td></tr>
+        </tbody></table></div>
+      <p class="small" style="margin-top:12px">The microprice is not better, and on the contracts we would
+      actually trade the two are indistinguishable. There is a mechanism for this rather than a shrug: the
+      microprice can only ever place its estimate <em>inside</em> the quoted bid and ask, and we had already
+      measured that the free feed's width is wrong — too narrow in liquid contracts, too wide in illiquid ones.
+      An estimator defined inside a mis-stated interval inherits the mis-statement. Displayed-size imbalance may
+      well carry information in options; this says only that reading it through a mis-stated spread does not
+      recover the true mid. We keep the simpler estimator and publish the null:
+      <span class="mono">results/microprice_study.json</span>.</p>
+    </div>
+
+    <div class="card">
+      <h3>What we did not build, and why</h3>
+      <p class="small" style="margin-top:10px">There is a mature literature of optimal execution, and we used
+      almost none of it. That is a choice, not an oversight, and the reasons are specific.</p>
+      <ul class="small" style="margin:10px 0 0;padding-left:18px">
+        <li><b>Optimal limit-order placement.</b> The standard result sets the depth to post at from the fill
+        intensity <span class="mono">λe<sup>−κδ</sup></span>. Estimating κ needs a history of fills at varying
+        depths, which at our data budget we do not have and cannot honestly fake. We use marketable orders inside
+        a price collar instead, and measure what that costs.</li>
+        <li><b>Impact-aware scheduling.</b> Almgren–Chriss scheduling matters when your order is a meaningful
+        fraction of daily volume. Ours is one to ten contracts against displayed depth of hundreds. The
+        machinery would be decoration.</li>
+        <li><b>Order-imbalance and short-term-alpha signals.</b> Real effects in equities, and the optimal-control
+        treatments show their value decaying to nothing as the deadline approaches — which is precisely where a
+        0DTE agent does most of its trading. We measured the one imbalance claim we could test, above, and it did
+        not hold on our data.</li>
+        <li><b>A volatility surface model.</b> We use the market's own implied volatilities rather than fitting a
+        surface, because a fitted surface would add parameters we cannot validate in a week.</li>
+      </ul>
+      <p class="small" style="margin-top:12px">The pattern is deliberate: where a technique needs a parameter we
+      cannot measure at this budget, we left it out and said so, rather than shipping an unvalidated estimate
+      with a confident name.</p>
+    </div>
+
     <div class="card plain">
       <h3>Limitations, stated rather than buried</h3>
       <ul class="small" style="margin:10px 0 0;padding-left:18px">
@@ -533,6 +750,17 @@ footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
         <li>The timing test is <b>ten pairs on one contract</b>. Adequate for the effect it targeted, not for smaller ones.</li>
         <li>Measurement noise is about one tick. The most liquid contract returned a true spread of <span class="mono">−$0.01</span> — the market moved between our buy and our sell. Read that as effectively zero, not a crossed market.</li>
         <li>The regime signal uses a <b>two-point proxy</b> for the second principal component of the volatility term structure, not the component itself.</li>
+        <li><b>Pin risk is the live hazard at the close</b>, and it is the reason for the 15:15 flatten. An option
+        that stays very close to the strike into expiry is the scenario options desks name as their nightmare:
+        gamma and the hedge requirement both explode while the payoff stays undetermined. We amputate it by being
+        flat rather than by managing it.</li>
+        <li><b>Early assignment is not modelled by us and may not be modelled by the venue.</b> These are American
+        options: the holder of our short leg may exercise at any time, and it becomes rational for them roughly
+        when the extrinsic value left in that leg goes to zero. The loss stays capped either way because the long
+        leg is already owned, but the agent now journals the exposure whenever an in-the-money short has under
+        five cents of extrinsic value left, rather than assuming a simulator's silence means the risk is absent.</li>
+        <li>The microprice result, the feed audit and the liquidity gate all rest on the same afternoon's quotes.
+        The intraday spread curve now being collected is the first of these measured across a whole session.</li>
       </ul>
     </div>
   </div>
@@ -550,7 +778,7 @@ footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
 </footer>
 
 </div>
-<script>const DATA = {"contracts":[{"c":"SPY260831C00720000","u":"SPY","dte":"0DTE","mny":0.9396,"indW":1.49,"trueW":0.27,"cost":27.0,"mid":46.52,"oi":2152},{"c":"SPY260831C00743000","u":"SPY","dte":"0DTE","mny":0.9696,"indW":0.12,"trueW":0.24,"cost":24.0,"mid":22.92,"oi":655},{"c":"SPY260831C00759000","u":"SPY","dte":"0DTE","mny":0.9905,"indW":0.12,"trueW":0.26,"cost":26.0,"mid":7.26,"oi":944},{"c":"SPY260831C00766000","u":"SPY","dte":"0DTE","mny":0.9996,"indW":0.01,"trueW":-0.01,"cost":-1.0,"mid":0.85,"oi":1842},{"c":"SPY260831C00774000","u":"SPY","dte":"0DTE","mny":1.01,"indW":0.03,"trueW":0.01,"cost":1.0,"mid":0.03,"oi":5791},{"c":"SPY260901C00720000","u":"SPY","dte":"1-3d","mny":0.9396,"indW":3.14,"trueW":3.18,"cost":318.0,"mid":45.46,"oi":4},{"c":"SPY260901C00743000","u":"SPY","dte":"1-3d","mny":0.9696,"indW":3.54,"trueW":3.47,"cost":347.0,"mid":23.5,"oi":2},{"c":"SPY260901C00759000","u":"SPY","dte":"1-3d","mny":0.9905,"indW":1.27,"trueW":1.39,"cost":139.0,"mid":7.14,"oi":393},{"c":"SPY260901C00766000","u":"SPY","dte":"1-3d","mny":0.9996,"indW":0.03,"trueW":0.03,"cost":3.0,"mid":2.06,"oi":1714},{"c":"SPY260901C00774000","u":"SPY","dte":"1-3d","mny":1.01,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.1,"oi":1418},{"c":"SPY260908C00720000","u":"SPY","dte":"7-12d","mny":0.9396,"indW":3.53,"trueW":3.3,"cost":330.0,"mid":46.95,"oi":2},{"c":"SPY260908C00759000","u":"SPY","dte":"7-12d","mny":0.9905,"indW":0.21,"trueW":0.21,"cost":21.0,"mid":10.03,"oi":131},{"c":"SPY260908C00766000","u":"SPY","dte":"7-12d","mny":0.9996,"indW":0.05,"trueW":0.02,"cost":2.0,"mid":4.96,"oi":206},{"c":"SPY260908C00774000","u":"SPY","dte":"7-12d","mny":1.01,"indW":0.06,"trueW":0.01,"cost":1.0,"mid":1.44,"oi":199},{"c":"SPY260908C00789000","u":"SPY","dte":"7-12d","mny":1.0296,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.06,"oi":92},{"c":"SPY260911C00812000","u":"SPY","dte":"7-12d","mny":1.0596,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.04,"oi":1378},{"c":"SPY260930C00720000","u":"SPY","dte":"28-45d","mny":0.9396,"indW":1.92,"trueW":3.06,"cost":306.0,"mid":49.26,"oi":1703},{"c":"SPY260831C00759000","u":"SPY","dte":"0DTE","mny":0.99,"indW":0.29,"trueW":0.2,"cost":20.0,"mid":7.51,"oi":944},{"c":"SPY260831C00767000","u":"SPY","dte":"0DTE","mny":1.0004,"indW":0.01,"trueW":0.0,"cost":0.0,"mid":0.4,"oi":2291},{"c":"SPY260831C00774000","u":"SPY","dte":"0DTE","mny":1.0096,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.01,"oi":5791},{"c":"SPY260901C00767000","u":"SPY","dte":"1-3d","mny":1.0004,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":1.59,"oi":1312},{"c":"SPY260901C00774000","u":"SPY","dte":"1-3d","mny":1.0096,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.06,"oi":1418},{"c":"SPY260908C00759000","u":"SPY","dte":"7-12d","mny":0.99,"indW":0.18,"trueW":0.2,"cost":20.0,"mid":10.16,"oi":131},{"c":"SPY260908C00767000","u":"SPY","dte":"7-12d","mny":1.0004,"indW":0.02,"trueW":0.03,"cost":3.0,"mid":4.38,"oi":64},{"c":"SPY260908C00774000","u":"SPY","dte":"7-12d","mny":1.0096,"indW":0.02,"trueW":0.02,"cost":2.0,"mid":1.48,"oi":199},{"c":"SPY260908C00790000","u":"SPY","dte":"7-12d","mny":1.0304,"indW":0.05,"trueW":0.01,"cost":1.0,"mid":0.04,"oi":204},{"c":"SPY260908C00805000","u":"SPY","dte":"7-12d","mny":1.05,"indW":0.03,"trueW":0.01,"cost":1.0,"mid":0.03,"oi":54},{"c":"SPY260930C00759000","u":"SPY","dte":"28-45d","mny":0.99,"indW":0.2,"trueW":0.2,"cost":20.0,"mid":15.83,"oi":718},{"c":"SPY260930C00767000","u":"SPY","dte":"28-45d","mny":1.0004,"indW":0.03,"trueW":0.03,"cost":3.0,"mid":10.62,"oi":336},{"c":"SPY260930C00774000","u":"SPY","dte":"28-45d","mny":1.0096,"indW":0.03,"trueW":0.03,"cost":3.0,"mid":6.72,"oi":492},{"c":"SPY260930C00790000","u":"SPY","dte":"28-45d","mny":1.0304,"indW":0.06,"trueW":0.02,"cost":2.0,"mid":1.83,"oi":7258},{"c":"SPY260930C00805000","u":"SPY","dte":"28-45d","mny":1.05,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.39,"oi":4701},{"c":"QQQ260831C00716000","u":"QQQ","dte":"0DTE","mny":1.0005,"indW":0.02,"trueW":0.02,"cost":2.0,"mid":0.43,"oi":1548},{"c":"QQQ260831C00723000","u":"QQQ","dte":"0DTE","mny":1.0103,"indW":0.03,"trueW":0.01,"cost":1.0,"mid":0.03,"oi":1003},{"c":"QQQ260901C00708000","u":"QQQ","dte":"1-3d","mny":0.9894,"indW":0.3,"trueW":0.51,"cost":51.0,"mid":7.92,"oi":633},{"c":"QQQ260901C00716000","u":"QQQ","dte":"1-3d","mny":1.0005,"indW":0.021,"trueW":0.03,"cost":3.0,"mid":2.04,"oi":518},{"c":"QQQ260901C00723000","u":"QQQ","dte":"1-3d","mny":1.0103,"indW":0.05,"trueW":0.01,"cost":1.0,"mid":0.21,"oi":646},{"c":"QQQ260908C00694000","u":"QQQ","dte":"7-12d","mny":0.9698,"indW":0.39,"trueW":0.58,"cost":58.0,"mid":23.02,"oi":11},{"c":"QQQ260908C00708000","u":"QQQ","dte":"7-12d","mny":0.9894,"indW":0.07,"trueW":0.1,"cost":10.0,"mid":11.13,"oi":4},{"c":"QQQ260908C00716000","u":"QQQ","dte":"7-12d","mny":1.0005,"indW":0.07,"trueW":0.06,"cost":6.0,"mid":5.79,"oi":25},{"c":"QQQ260908C00723000","u":"QQQ","dte":"7-12d","mny":1.0103,"indW":0.05,"trueW":0.05,"cost":5.0,"mid":2.73,"oi":54},{"c":"QQQ260908C00737000","u":"QQQ","dte":"7-12d","mny":1.0299,"indW":0.06,"trueW":0.02,"cost":2.0,"mid":0.27,"oi":339},{"c":"QQQ260908C00751000","u":"QQQ","dte":"7-12d","mny":1.0495,"indW":0.03,"trueW":0.03,"cost":3.0,"mid":0.04,"oi":73},{"c":"QQQ260930C00708000","u":"QQQ","dte":"28-45d","mny":0.9894,"indW":0.32,"trueW":0.13,"cost":13.0,"mid":19.43,"oi":298},{"c":"QQQ260930C00716000","u":"QQQ","dte":"28-45d","mny":1.0005,"indW":0.2,"trueW":0.12,"cost":12.0,"mid":14.33,"oi":228},{"c":"QQQ260930C00723000","u":"QQQ","dte":"28-45d","mny":1.0103,"indW":0.1,"trueW":0.1,"cost":10.0,"mid":10.64,"oi":1062},{"c":"QQQ260930C00737000","u":"QQQ","dte":"28-45d","mny":1.0299,"indW":0.14,"trueW":0.07,"cost":7.0,"mid":4.96,"oi":150},{"c":"QQQ260930C00751000","u":"QQQ","dte":"28-45d","mny":1.0495,"indW":0.1,"trueW":0.05,"cost":5.0,"mid":2.04,"oi":200},{"c":"AAPL260831C00305000","u":"AAPL","dte":"0DTE","mny":0.9665,"indW":0.18,"trueW":0.3,"cost":30.0,"mid":10.26,"oi":331},{"c":"AAPL260831C00312500","u":"AAPL","dte":"0DTE","mny":0.9903,"indW":0.26,"trueW":0.25,"cost":25.0,"mid":2.91,"oi":949},{"c":"AAPL260831C00315000","u":"AAPL","dte":"0DTE","mny":0.9982,"indW":0.02,"trueW":0.02,"cost":2.0,"mid":0.73,"oi":6572},{"c":"AAPL260831C00317500","u":"AAPL","dte":"0DTE","mny":1.0061,"indW":0.05,"trueW":0.01,"cost":1.0,"mid":0.07,"oi":2342},{"c":"AAPL260902C00312500","u":"AAPL","dte":"1-3d","mny":0.9903,"indW":0.03,"trueW":0.1,"cost":10.0,"mid":3.96,"oi":448},{"c":"AAPL260902C00315000","u":"AAPL","dte":"1-3d","mny":0.9982,"indW":0.05,"trueW":0.05,"cost":5.0,"mid":2.42,"oi":561},{"c":"AAPL260902C00317500","u":"AAPL","dte":"1-3d","mny":1.0061,"indW":0.02,"trueW":0.01,"cost":1.0,"mid":1.39,"oi":472},{"c":"AAPL260902C00325000","u":"AAPL","dte":"1-3d","mny":1.0299,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.2,"oi":2609},{"c":"AAPL260902C00332500","u":"AAPL","dte":"1-3d","mny":1.0537,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.06,"oi":165},{"c":"AAPL260909C00315000","u":"AAPL","dte":"7-12d","mny":0.9982,"indW":0.27,"trueW":0.2,"cost":20.0,"mid":5.21,"oi":1292},{"c":"AAPL260909C00317500","u":"AAPL","dte":"7-12d","mny":1.0061,"indW":0.15,"trueW":0.15,"cost":15.0,"mid":4.0,"oi":142},{"c":"AAPL260909C00325000","u":"AAPL","dte":"7-12d","mny":1.0299,"indW":0.06,"trueW":0.06,"cost":6.0,"mid":1.58,"oi":672},{"c":"AAPL260909C00332500","u":"AAPL","dte":"7-12d","mny":1.0537,"indW":0.14,"trueW":0.14,"cost":14.0,"mid":0.52,"oi":9},{"c":"AAPL261002C00310000","u":"AAPL","dte":"28-45d","mny":0.9824,"indW":0.31,"trueW":0.3,"cost":30.0,"mid":12.84,"oi":1944},{"c":"AAPL261002C00320000","u":"AAPL","dte":"28-45d","mny":1.0141,"indW":0.19,"trueW":0.3,"cost":30.0,"mid":7.38,"oi":536},{"c":"AAPL261002C00325000","u":"AAPL","dte":"28-45d","mny":1.0299,"indW":0.27,"trueW":0.3,"cost":30.0,"mid":5.45,"oi":300},{"c":"AAPL261002C00330000","u":"AAPL","dte":"28-45d","mny":1.0457,"indW":0.31,"trueW":0.25,"cost":25.0,"mid":3.92,"oi":1085}],"oracle":[{"limit":5.05,"fill":5.02},{"limit":5.1,"fill":5.01},{"limit":5.2,"fill":5.02},{"limit":5.45,"fill":5.02},{"limit":6.05,"fill":5.01}],"paired":[{"a":-0.0207,"b":-0.0178,"diff":0.0029},{"a":0.005,"b":0.0161,"diff":0.0111},{"a":0.005,"b":-0.0095,"diff":-0.0145},{"a":-0.003,"b":-0.0154,"diff":-0.0124},{"a":-0.0281,"b":-0.009,"diff":0.0191},{"a":-0.0218,"b":0.0053,"diff":0.0271},{"a":-0.0121,"b":-0.0142,"diff":-0.0021},{"a":0.0333,"b":0.0295,"diff":-0.0038},{"a":-0.005,"b":0.0054,"diff":0.0104},{"a":-0.025,"b":-0.0476,"diff":-0.0226}],"summary":{"n":10,"mean_A":-0.007239999999999999,"mean_B":-0.00572,"diff":0.0015199999999999983,"t":0.30677238817229446,"favourable":7}};</script>
+<script>const DATA = {"contracts":[{"c":"SPY260831C00720000","u":"SPY","dte":"0DTE","mny":0.9396,"indW":1.49,"trueW":0.27,"cost":27.0,"mid":46.52,"oi":2152},{"c":"SPY260831C00743000","u":"SPY","dte":"0DTE","mny":0.9696,"indW":0.12,"trueW":0.24,"cost":24.0,"mid":22.92,"oi":655},{"c":"SPY260831C00759000","u":"SPY","dte":"0DTE","mny":0.9905,"indW":0.12,"trueW":0.26,"cost":26.0,"mid":7.26,"oi":944},{"c":"SPY260831C00766000","u":"SPY","dte":"0DTE","mny":0.9996,"indW":0.01,"trueW":-0.01,"cost":-1.0,"mid":0.85,"oi":1842},{"c":"SPY260831C00774000","u":"SPY","dte":"0DTE","mny":1.01,"indW":0.03,"trueW":0.01,"cost":1.0,"mid":0.03,"oi":5791},{"c":"SPY260901C00720000","u":"SPY","dte":"1-3d","mny":0.9396,"indW":3.14,"trueW":3.18,"cost":318.0,"mid":45.46,"oi":4},{"c":"SPY260901C00743000","u":"SPY","dte":"1-3d","mny":0.9696,"indW":3.54,"trueW":3.47,"cost":347.0,"mid":23.5,"oi":2},{"c":"SPY260901C00759000","u":"SPY","dte":"1-3d","mny":0.9905,"indW":1.27,"trueW":1.39,"cost":139.0,"mid":7.14,"oi":393},{"c":"SPY260901C00766000","u":"SPY","dte":"1-3d","mny":0.9996,"indW":0.03,"trueW":0.03,"cost":3.0,"mid":2.06,"oi":1714},{"c":"SPY260901C00774000","u":"SPY","dte":"1-3d","mny":1.01,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.1,"oi":1418},{"c":"SPY260908C00720000","u":"SPY","dte":"7-12d","mny":0.9396,"indW":3.53,"trueW":3.3,"cost":330.0,"mid":46.95,"oi":2},{"c":"SPY260908C00759000","u":"SPY","dte":"7-12d","mny":0.9905,"indW":0.21,"trueW":0.21,"cost":21.0,"mid":10.03,"oi":131},{"c":"SPY260908C00766000","u":"SPY","dte":"7-12d","mny":0.9996,"indW":0.05,"trueW":0.02,"cost":2.0,"mid":4.96,"oi":206},{"c":"SPY260908C00774000","u":"SPY","dte":"7-12d","mny":1.01,"indW":0.06,"trueW":0.01,"cost":1.0,"mid":1.44,"oi":199},{"c":"SPY260908C00789000","u":"SPY","dte":"7-12d","mny":1.0296,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.06,"oi":92},{"c":"SPY260911C00812000","u":"SPY","dte":"7-12d","mny":1.0596,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.04,"oi":1378},{"c":"SPY260930C00720000","u":"SPY","dte":"28-45d","mny":0.9396,"indW":1.92,"trueW":3.06,"cost":306.0,"mid":49.26,"oi":1703},{"c":"SPY260831C00759000","u":"SPY","dte":"0DTE","mny":0.99,"indW":0.29,"trueW":0.2,"cost":20.0,"mid":7.51,"oi":944},{"c":"SPY260831C00767000","u":"SPY","dte":"0DTE","mny":1.0004,"indW":0.01,"trueW":0.0,"cost":0.0,"mid":0.4,"oi":2291},{"c":"SPY260831C00774000","u":"SPY","dte":"0DTE","mny":1.0096,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.01,"oi":5791},{"c":"SPY260901C00767000","u":"SPY","dte":"1-3d","mny":1.0004,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":1.59,"oi":1312},{"c":"SPY260901C00774000","u":"SPY","dte":"1-3d","mny":1.0096,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.06,"oi":1418},{"c":"SPY260908C00759000","u":"SPY","dte":"7-12d","mny":0.99,"indW":0.18,"trueW":0.2,"cost":20.0,"mid":10.16,"oi":131},{"c":"SPY260908C00767000","u":"SPY","dte":"7-12d","mny":1.0004,"indW":0.02,"trueW":0.03,"cost":3.0,"mid":4.38,"oi":64},{"c":"SPY260908C00774000","u":"SPY","dte":"7-12d","mny":1.0096,"indW":0.02,"trueW":0.02,"cost":2.0,"mid":1.48,"oi":199},{"c":"SPY260908C00790000","u":"SPY","dte":"7-12d","mny":1.0304,"indW":0.05,"trueW":0.01,"cost":1.0,"mid":0.04,"oi":204},{"c":"SPY260908C00805000","u":"SPY","dte":"7-12d","mny":1.05,"indW":0.03,"trueW":0.01,"cost":1.0,"mid":0.03,"oi":54},{"c":"SPY260930C00759000","u":"SPY","dte":"28-45d","mny":0.99,"indW":0.2,"trueW":0.2,"cost":20.0,"mid":15.83,"oi":718},{"c":"SPY260930C00767000","u":"SPY","dte":"28-45d","mny":1.0004,"indW":0.03,"trueW":0.03,"cost":3.0,"mid":10.62,"oi":336},{"c":"SPY260930C00774000","u":"SPY","dte":"28-45d","mny":1.0096,"indW":0.03,"trueW":0.03,"cost":3.0,"mid":6.72,"oi":492},{"c":"SPY260930C00790000","u":"SPY","dte":"28-45d","mny":1.0304,"indW":0.06,"trueW":0.02,"cost":2.0,"mid":1.83,"oi":7258},{"c":"SPY260930C00805000","u":"SPY","dte":"28-45d","mny":1.05,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.39,"oi":4701},{"c":"QQQ260831C00716000","u":"QQQ","dte":"0DTE","mny":1.0005,"indW":0.02,"trueW":0.02,"cost":2.0,"mid":0.43,"oi":1548},{"c":"QQQ260831C00723000","u":"QQQ","dte":"0DTE","mny":1.0103,"indW":0.03,"trueW":0.01,"cost":1.0,"mid":0.03,"oi":1003},{"c":"QQQ260901C00708000","u":"QQQ","dte":"1-3d","mny":0.9894,"indW":0.3,"trueW":0.51,"cost":51.0,"mid":7.92,"oi":633},{"c":"QQQ260901C00716000","u":"QQQ","dte":"1-3d","mny":1.0005,"indW":0.021,"trueW":0.03,"cost":3.0,"mid":2.04,"oi":518},{"c":"QQQ260901C00723000","u":"QQQ","dte":"1-3d","mny":1.0103,"indW":0.05,"trueW":0.01,"cost":1.0,"mid":0.21,"oi":646},{"c":"QQQ260908C00694000","u":"QQQ","dte":"7-12d","mny":0.9698,"indW":0.39,"trueW":0.58,"cost":58.0,"mid":23.02,"oi":11},{"c":"QQQ260908C00708000","u":"QQQ","dte":"7-12d","mny":0.9894,"indW":0.07,"trueW":0.1,"cost":10.0,"mid":11.13,"oi":4},{"c":"QQQ260908C00716000","u":"QQQ","dte":"7-12d","mny":1.0005,"indW":0.07,"trueW":0.06,"cost":6.0,"mid":5.79,"oi":25},{"c":"QQQ260908C00723000","u":"QQQ","dte":"7-12d","mny":1.0103,"indW":0.05,"trueW":0.05,"cost":5.0,"mid":2.73,"oi":54},{"c":"QQQ260908C00737000","u":"QQQ","dte":"7-12d","mny":1.0299,"indW":0.06,"trueW":0.02,"cost":2.0,"mid":0.27,"oi":339},{"c":"QQQ260908C00751000","u":"QQQ","dte":"7-12d","mny":1.0495,"indW":0.03,"trueW":0.03,"cost":3.0,"mid":0.04,"oi":73},{"c":"QQQ260930C00708000","u":"QQQ","dte":"28-45d","mny":0.9894,"indW":0.32,"trueW":0.13,"cost":13.0,"mid":19.43,"oi":298},{"c":"QQQ260930C00716000","u":"QQQ","dte":"28-45d","mny":1.0005,"indW":0.2,"trueW":0.12,"cost":12.0,"mid":14.33,"oi":228},{"c":"QQQ260930C00723000","u":"QQQ","dte":"28-45d","mny":1.0103,"indW":0.1,"trueW":0.1,"cost":10.0,"mid":10.64,"oi":1062},{"c":"QQQ260930C00737000","u":"QQQ","dte":"28-45d","mny":1.0299,"indW":0.14,"trueW":0.07,"cost":7.0,"mid":4.96,"oi":150},{"c":"QQQ260930C00751000","u":"QQQ","dte":"28-45d","mny":1.0495,"indW":0.1,"trueW":0.05,"cost":5.0,"mid":2.04,"oi":200},{"c":"AAPL260831C00305000","u":"AAPL","dte":"0DTE","mny":0.9665,"indW":0.18,"trueW":0.3,"cost":30.0,"mid":10.26,"oi":331},{"c":"AAPL260831C00312500","u":"AAPL","dte":"0DTE","mny":0.9903,"indW":0.26,"trueW":0.25,"cost":25.0,"mid":2.91,"oi":949},{"c":"AAPL260831C00315000","u":"AAPL","dte":"0DTE","mny":0.9982,"indW":0.02,"trueW":0.02,"cost":2.0,"mid":0.73,"oi":6572},{"c":"AAPL260831C00317500","u":"AAPL","dte":"0DTE","mny":1.0061,"indW":0.05,"trueW":0.01,"cost":1.0,"mid":0.07,"oi":2342},{"c":"AAPL260902C00312500","u":"AAPL","dte":"1-3d","mny":0.9903,"indW":0.03,"trueW":0.1,"cost":10.0,"mid":3.96,"oi":448},{"c":"AAPL260902C00315000","u":"AAPL","dte":"1-3d","mny":0.9982,"indW":0.05,"trueW":0.05,"cost":5.0,"mid":2.42,"oi":561},{"c":"AAPL260902C00317500","u":"AAPL","dte":"1-3d","mny":1.0061,"indW":0.02,"trueW":0.01,"cost":1.0,"mid":1.39,"oi":472},{"c":"AAPL260902C00325000","u":"AAPL","dte":"1-3d","mny":1.0299,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.2,"oi":2609},{"c":"AAPL260902C00332500","u":"AAPL","dte":"1-3d","mny":1.0537,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.06,"oi":165},{"c":"AAPL260909C00315000","u":"AAPL","dte":"7-12d","mny":0.9982,"indW":0.27,"trueW":0.2,"cost":20.0,"mid":5.21,"oi":1292},{"c":"AAPL260909C00317500","u":"AAPL","dte":"7-12d","mny":1.0061,"indW":0.15,"trueW":0.15,"cost":15.0,"mid":4.0,"oi":142},{"c":"AAPL260909C00325000","u":"AAPL","dte":"7-12d","mny":1.0299,"indW":0.06,"trueW":0.06,"cost":6.0,"mid":1.58,"oi":672},{"c":"AAPL260909C00332500","u":"AAPL","dte":"7-12d","mny":1.0537,"indW":0.14,"trueW":0.14,"cost":14.0,"mid":0.52,"oi":9},{"c":"AAPL261002C00310000","u":"AAPL","dte":"28-45d","mny":0.9824,"indW":0.31,"trueW":0.3,"cost":30.0,"mid":12.84,"oi":1944},{"c":"AAPL261002C00320000","u":"AAPL","dte":"28-45d","mny":1.0141,"indW":0.19,"trueW":0.3,"cost":30.0,"mid":7.38,"oi":536},{"c":"AAPL261002C00325000","u":"AAPL","dte":"28-45d","mny":1.0299,"indW":0.27,"trueW":0.3,"cost":30.0,"mid":5.45,"oi":300},{"c":"AAPL261002C00330000","u":"AAPL","dte":"28-45d","mny":1.0457,"indW":0.31,"trueW":0.25,"cost":25.0,"mid":3.92,"oi":1085}],"oracle":[{"limit":5.05,"fill":5.02},{"limit":5.1,"fill":5.01},{"limit":5.2,"fill":5.02},{"limit":5.45,"fill":5.02},{"limit":6.05,"fill":5.01}],"paired":[{"a":-0.0207,"b":-0.0178,"diff":0.0029},{"a":0.005,"b":0.0161,"diff":0.0111},{"a":0.005,"b":-0.0095,"diff":-0.0145},{"a":-0.003,"b":-0.0154,"diff":-0.0124},{"a":-0.0281,"b":-0.009,"diff":0.0191},{"a":-0.0218,"b":0.0053,"diff":0.0271},{"a":-0.0121,"b":-0.0142,"diff":-0.0021},{"a":0.0333,"b":0.0295,"diff":-0.0038},{"a":-0.005,"b":0.0054,"diff":0.0104},{"a":-0.025,"b":-0.0476,"diff":-0.0226}],"summary":{"n":10,"mean_A":-0.007239999999999999,"mean_B":-0.00572,"diff":0.0015199999999999983,"t":0.30677238817229446,"favourable":7},"micro":{"n":64,"rmse_mid":0.14056944736054894,"rmse_micro":0.2288871884321804,"p":0.3014865109636029,"verdict":"the plain mid is nominally more accurate (RMSE 0.1406 vs 0.2289) but the paired test on absolute errors does not reach significance (p = 0.30). The bootstrap CI on the RMSE difference is [-0.239, +0.003]. Nothing here justifies replacing the mid with the microprice in this pipeline; we keep the simpler estimator and publish the null."},"refusals":{"evaluations":3,"refusals":1,"settled":0,"pending":0,"net":null,"saved":null,"cost":null,"by_gate":{}},"spread_curve":{}};</script>
 <script>(function(){
 "use strict";
 var $ = function(id){ return document.getElementById(id); };
