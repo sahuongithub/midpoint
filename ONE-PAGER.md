@@ -13,9 +13,9 @@ Retail options traders lost **$2.10bn** between Nov 2019 and Jun 2021. Their *tr
 
 Nobody is required to show them that bill. Rule 605 mandates execution-quality disclosure for *NMS stocks*; 17 CFR 242.600 defines an NMS stock as **"any NMS security other than an option."** Equities got this in 2001. Options never did.
 
-Building the missing receipt meant first solving measurement. Alpaca's paper engine fills a marketable order at the true NBBO regardless of your limit — six orders sent at one instant with limits spanning **$1.00** filled within **$0.01** of each other. Every fill is an exact reading of the real market, so ground truth costs nothing.
+Building the receipt meant first solving measurement. Alpaca's paper engine fills a marketable order at the true NBBO regardless of your limit — six orders sent at one instant, limits spanning **$1.00**, fills within **$0.01** of each other. Every fill is therefore an exact reading of the real market, so ground truth costs nothing.
 
-**What that measured, live:** across 65 contracts in one afternoon, the true cost of a single contract ran from **−$1 to $347**. A deep in-the-money call — a hundred shares of delta — cost **116×** more in spread than buying the shares outright. And patient execution, the received wisdom, **doesn't pay here**: ten paired trials, **+$0.15/contract, t = +0.31**, 95% CI **[−$0.82, +$1.12]**, excluding the published effect we were testing for — one that needed only four pairs to detect.
+**What that measured, live:** across 65 contracts in one afternoon the true cost of a contract ran from **−$1 to $347**, and a deep in-the-money call — a hundred shares of delta — cost **116×** more in spread than buying the shares outright. Patient execution, the received wisdom, **doesn't pay here**: ten paired trials, **+$0.15/contract, t = +0.31**, CI **[−$0.82, +$1.12]**, excluding the effect we were testing for — one that needed only four pairs to detect.
 
 **Contract selection is worth roughly eighty times more than execution timing.** That came from refuting our own hypothesis, and it is what the product now leads with.
 
@@ -23,7 +23,7 @@ Building the missing receipt meant first solving measurement. Alpaca's paper eng
 
 The language model **cannot place a trade** — a capability guarantee, not an instruction. It connects to Alpaca's MCP server with the trading toolset never loaded, and we measured the boundary rather than asserting it: **72 tools unrestricted, 13 order-capable; 31 restricted, zero order-capable.**
 
-Its job is what language is uniquely good for — reading news to judge whether a name carries a binary catalyst — and it emits labels and verbatim quotes, **never numbers**. Every number acted on comes from deterministic Python: model-free implied variance, Black-Scholes greeks on an intraday clock, the term-structure regime gate. LLMs are unreliable at multivariate arithmetic, and the 2026 audit literature is full of agents that underperform buy-and-hold once frictions are modelled.
+Its job is what language is uniquely good for — reading news for binary catalysts — and it emits labels and verbatim quotes, **never numbers**. Every number acted on comes from deterministic Python: model-free implied variance, Black-Scholes greeks on an intraday clock, the term-structure gate. LLMs are unreliable at multivariate arithmetic, and the 2026 audit literature is full of agents that underperform buy-and-hold once frictions are modelled.
 
 The signal is Johnson's (JFQA 2017): the **shape** of the volatility term structure predicts straddle excess returns while the **level** predicts nothing — which is why IV rank appears nowhere here.
 
@@ -39,7 +39,7 @@ Two gates enforce our own measurements: a **$0.20 liquidity gate** — derived o
 
 **MCP is the read path and the security boundary; the CLI is the write path.** Spreads go in as one atomic `mleg` order, so no window exists in which one leg is filled and the other is not — and since Alpaca requires every short leg covered within the order, an uncovered short is structurally unrepresentable. Orders carry a deterministic `client_order_id` derived from intent, so a restarted agent replays the same identifier and Alpaca rejects the duplicate.
 
-Two pieces of quant infrastructure exist only because the platform forces them. Alpaca serves **no index data**, so the term structure is computed from the SPY chain. Alpaca returns **no greeks for same-day expiries** — a Black-Scholes limitation, not a bug — so expiry-day behaviour needs its own engine on an intraday clock. The strongest result in our fair-value study (**slope 0.89, t = 24.1, R² = 0.726** at 40 seconds) came from exactly the contracts where the platform supplies nothing.
+Two pieces of quant infrastructure exist only because the platform forces them: Alpaca serves **no index data**, so the term structure is computed from the SPY chain, and it returns **no greeks for same-day expiries**, so expiry-day behaviour needs its own engine on an intraday clock. The strongest result in our fair-value study (**slope 0.89, t = 24.1, R² = 0.726** at 40 seconds) came from exactly the contracts where the platform supplies nothing.
 
 ### What we do not claim
 
