@@ -319,12 +319,14 @@ class Agent:
             self._journal("outside_window", et=now.strftime("%H:%M"), window=self.cfg.open_window_et)
             return "outside_window"
 
+        held = {p.get("symbol") for p in positions if p.get("symbol")}
         built = build_vertical(underlying=self.cfg.underlying, min_dte=self.cfg.min_dte,
                                max_dte=self.cfg.max_dte, kind=self.cfg.kind,
                                target_short_delta=self.cfg.target_short_delta,
                                width_strikes=self.cfg.width_strikes,
                                max_quoted_width=self.kernel.cfg.max_quoted_width,
-                               contracts=self.cfg.contracts)
+                               contracts=self.cfg.contracts,
+                               exclude_symbols=held)
         if not built["ok"]:
             # a structure-stage refusal is still a refusal: journal it into the same
             # ledger the kernel writes, with the quotes attached, so that

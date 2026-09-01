@@ -150,13 +150,25 @@ def fetch_chain(underlying: str, min_dte: int, max_dte: int, kind: str,
 def build_vertical(underlying: str = "SPY", min_dte: int = 0, max_dte: int = 2,
                    kind: str = "put", target_short_delta: float = 0.20,
                    width_strikes: float = 1.0, max_quoted_width: float = 0.20,
-                   contracts: int = 1) -> dict:
+                   contracts: int = 1, exclude_symbols=None) -> dict:
     """Returns {'ok': bool, 'reason': str, 'proposal': Proposal, ...}."""
     spot = float(aio.req("GET", "%s/v2/stocks/%s/trades/latest" % (aio.DATA, underlying),
                          params={"feed": "iex"})["trade"]["p"])
     chain = fetch_chain(underlying, min_dte, max_dte, kind, spot)
     if not chain:
         return {"ok": False, "reason": "no quotable contracts in the window"}
+
+    # A leg we already hold cannot be a leg of a NEW spread. Alpaca infers intent
+    # from the existing position, so buying a contract we are short reads as
+    # closing that short, not opening a long -- the order is rejected outright
+    # ("position intent mismatch"). Excluding held symbols before the structure is
+    # chosen avoids proposing a trade the broker was always going to refuse.
+    if exclude_symbols:
+        held = set(exclude_symbols)
+        chain = [c for c in chain if c.symbol not in held]
+        if not chain:
+            return {"ok": False, "gate": "structure-overlap",
+                    "reason": "every candidate strike is already held in an open position"}
 
     usable = [c for c in chain if c.delta is not None]
     if not usable:
