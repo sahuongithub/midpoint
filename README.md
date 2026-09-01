@@ -22,6 +22,9 @@ Equities got execution-quality disclosure in 2001. Options never did.
 costs, why the numbers are trustworthy, and the working behind them. Seven interactions over real
 measured data; plain English on the surface, the full statistics in the appendix.
 
+**[The agent's decision log →](audit/)** — every decision it made, published as it ran,
+refusals included. Hash-chained, so editing any earlier entry breaks every hash after it.
+
 ## What this is
 
 A measurement method, four findings, and an agent that acts on them.
