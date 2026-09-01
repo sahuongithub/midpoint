@@ -118,7 +118,7 @@ def main(trials=10000):
                 "trade_cap_respected", "aggregate_cap_respected",
                 "fat_finger_respected", "one_journal_line_each",
                 "shrink_only_downward", "kill_switch_absolute",
-                "account_guard_absolute", "size_monotone")}
+                "account_guard_absolute", "allowlist_absolute", "size_monotone")}
 
     seen = {}
     print("running %d random proposals against the kernel invariants" % trials)
@@ -203,6 +203,29 @@ def main(trials=10000):
         checked["account_guard_absolute"] += 1
         if d.action != REJECT:
             fail("account_guard_absolute", "competition account not refused", p, s, d)
+
+    # and the allowlist form: when a session names its account, nothing else trades
+    print("checking the allowlist form of the account gate on %d cases" % (trials // 10))
+    cfg_allow = replace(cfg, allowed_account="PA_ONLY_THIS")
+    for i in range(trials // 10):
+        k = RiskKernel(cfg_allow, journal_path=jpath)
+        p = rand_proposal(rng, cfg, tradeable=True)
+        s = rand_state(rng, cfg, healthy=True)
+        s.account_number = "PA_SOMETHING_ELSE"
+        d = k.evaluate(p, s)
+        checked["allowlist_absolute"] += 1
+        if d.action != REJECT or d.gate != "G0-account":
+            fail("allowlist_absolute", "wrong account was not refused", p, s, d)
+    # ...and the authorised account still gets through
+    k = RiskKernel(cfg_allow, journal_path=jpath)
+    p = rand_proposal(rng, cfg, tradeable=True)
+    s = rand_state(rng, cfg, healthy=True)
+    s.account_number = "PA_ONLY_THIS"
+    p.contracts = 1
+    d = k.evaluate(p, s)
+    checked["allowlist_absolute"] += 1
+    if d.gate == "G0-account":
+        fail("allowlist_absolute", "authorised account was refused by G0", p, s, d)
 
     # 8. monotonicity in size: if n contracts are refused for a sizing reason,
     #    then more contracts must also be refused (fresh kernel, same state)

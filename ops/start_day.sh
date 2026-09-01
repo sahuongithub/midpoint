@@ -1,7 +1,14 @@
 #!/bin/zsh
 # Start everything for one trading day, in one command.
 #
-#   ./ops/start_day.sh
+#   ./ops/start_day.sh                  research account, for experiments
+#   ./ops/start_day.sh --competition    the account the contest is judged on
+#
+# Two accounts, deliberately kept apart. Research probes buy and sell purely to
+# measure the venue, and a judged account carrying that traffic would have an
+# equity curve nobody could read. So the agent's judged record runs on one
+# account and every probe on the other, and the risk kernel is told which one
+# this session may touch -- anything else is refused whatever its number.
 #
 # Safe to run twice: it refuses to start a second agent if one is already running.
 # Everything it starts is detached, so closing the terminal does not kill it.
@@ -17,11 +24,24 @@ echo "======================================================================"
 echo "  MIDPOINT -- starting the day    $ET_DATE  $ET_TIME ET"
 echo "======================================================================"
 
-if [ -f "$HOME/.config/midpoint/lab.env" ]; then
-  set -a; . "$HOME/.config/midpoint/lab.env"; set +a
-else
-  echo "  ! no credentials at ~/.config/midpoint/lab.env"; exit 1
+MODE="research"
+ENVFILE="$HOME/.config/midpoint/lab.env"
+for a in "$@"; do
+  if [ "$a" = "--competition" ]; then
+    MODE="competition"
+    ENVFILE="$HOME/.config/midpoint/competition.env"
+  fi
+done
+
+if [ ! -f "$ENVFILE" ]; then
+  echo "  ! no credentials at $ENVFILE"
+  if [ "$MODE" = "competition" ]; then
+    echo "    See ops/SETUP-COMPETITION.md for how to create it."
+  fi
+  exit 1
 fi
+set -a; . "$ENVFILE"; set +a
+echo "  mode:    $MODE   ($(basename $ENVFILE))"
 
 if [ -f "$ROOT/HALT" ]; then
   echo "  ! the kill switch is pulled. Remove it first:  rm ~/midpoint/HALT"
@@ -47,7 +67,12 @@ esac
 # --- 2. pre-flight -------------------------------------------------------
 echo ""
 echo "  running pre-flight..."
-if ! /usr/bin/python3 tools/preflight.py --expect "${EXPECT_ACCOUNT:-PA3TD7HMABNH}" \
+EXPECT="${EXPECT_ACCOUNT:-}"
+if [ -z "$EXPECT" ]; then
+  EXPECT=$(/usr/bin/python3 -c "import os,sys; sys.path.insert(0,os.path.expanduser('~/midpoint/tools')); import alpaca_io as aio; print(aio.account()['account_number'])")
+fi
+echo "  account: $EXPECT"
+if ! /usr/bin/python3 tools/preflight.py --expect "$EXPECT" \
       > "$LOG/preflight.$STAMP.log" 2>&1; then
   echo "  ! PRE-FLIGHT FAILED -- nothing started. Details:"
   tail -20 "$LOG/preflight.$STAMP.log" | sed 's/^/      /'
@@ -60,7 +85,8 @@ echo ""
 if pgrep -f "tools/agent.py --live" > /dev/null; then
   echo "  agent already running -- leaving it alone"
 else
-  nohup ./ops/run_session.sh "$ET_DATE" --live --cycle-seconds 60 --until-et 16:00 \
+  MIDPOINT_ALLOWED_ACCOUNT="$EXPECT" MIDPOINT_ENV="$ENVFILE" \
+    nohup ./ops/run_session.sh "$ET_DATE" --live --cycle-seconds 60 --until-et 16:00 \
     > "$LOG/session.$STAMP.log" 2>&1 &
   echo "  agent started        -> trades until 16:00 ET, flattens at 15:15"
 fi
@@ -86,3 +112,7 @@ echo ""
 echo "  Watch it:      python3 tools/watch.py"
 echo "  Stop it all:   touch ~/midpoint/HALT"
 echo "  Film between:  10:00 and 14:00 ET  (19:30-23:30 IST)"
+if [ "$MODE" = "competition" ]; then
+  echo ""
+  echo "  This is the judged account. Research probes never run against it."
+fi

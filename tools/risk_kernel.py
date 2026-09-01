@@ -72,6 +72,7 @@ class RiskConfig:
     kill_switch_path: str = "~/midpoint/HALT"
     max_consecutive_rejects: int = 25       # the "97 ignored emails" gate
     competition_account: str = "PA32CGA2U1DY"
+    allowed_account: Optional[str] = None   # when set, ONLY this account may trade
 
 
 @dataclass
@@ -151,6 +152,21 @@ class RiskKernel:
     #      or (gate_id, reason, new_contracts) to shrink.
 
     def g0_account(self, p, s):
+        """Trade the account this session was authorised for, and no other.
+
+        This began as a blocklist protecting the contest account from research
+        spending. A blocklist is the weaker design: it stops one known mistake and
+        permits every unknown one, so a session pointed at the wrong credentials by
+        accident would have traded happily. When allowed_account is set the gate
+        inverts into an allowlist -- the account must be the expected one, and
+        anything else is refused whatever its number.
+        """
+        if self.cfg.allowed_account:
+            if s.account_number != self.cfg.allowed_account:
+                return ("G0-account",
+                        "account %s is not the one this session is authorised for (%s)"
+                        % (s.account_number, self.cfg.allowed_account))
+            return None
         if s.account_number == self.cfg.competition_account and os.environ.get(
                 "MIDPOINT_ALLOW_COMPETITION") != "yes":
             return ("G0-account", "competition account without explicit authorisation")

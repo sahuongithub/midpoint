@@ -5,10 +5,11 @@ ROOT="$HOME/midpoint"
 LOG="$ROOT/ops/logs"; mkdir -p "$LOG"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 ONDATE="${1:-any}"; shift 2>/dev/null || true
-EXPECT="${EXPECT_ACCOUNT:-PA3TD7HMABNH}"
+EXPECT="${EXPECT_ACCOUNT:-${MIDPOINT_ALLOWED_ACCOUNT:-PA3TD7HMABNH}}"
 
-if [ -f "$HOME/.config/midpoint/lab.env" ]; then
-  set -a; . "$HOME/.config/midpoint/lab.env"; set +a
+ENVFILE="${MIDPOINT_ENV:-$HOME/.config/midpoint/lab.env}"
+if [ -f "$ENVFILE" ]; then
+  set -a; . "$ENVFILE"; set +a
 fi
 
 TODAY_ET="$(TZ=America/New_York date +%Y-%m-%d)"
