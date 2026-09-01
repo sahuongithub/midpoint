@@ -8,9 +8,9 @@ Every decision this agent made, published as it ran. Refusals included — espec
 
 | Tier | What it means | Records | Orders opened | Positions closed | Refused |
 |---|---|---|---|---|---|
-| **paper** | real order, real quote, simulated money | 0 | 0 | 0 | — |
-| **simulated** | dry run — no order left the machine | 21 | 2 | 1 | — |
-| **evaluation** | risk-kernel decision; no order implied | 3 | — | — | 1 |
+| **paper** | real order, real quote, simulated money | 284 | 5 | 5 | — |
+| **simulated** | dry run — no order left the machine | 24 | 2 | 1 | — |
+| **evaluation** | risk-kernel decision; no order implied | 160 | — | — | 139 |
 
 Refusals are counted from the risk kernel's own records only. The agent journals the same decision from its side, and counting both would double every one.
 
@@ -18,6 +18,10 @@ Refusals are counted from the risk kernel's own records only. The agent journals
 
 | Gate | Refusals |
 |---|---|
+| `G13-escalation` | 57 |
+| `G8-price-collar` | 55 |
+| `G3-trade-size` | 22 |
+| `structure-no-credit` | 4 |
 | `G10-duplicate` | 1 |
 
 ## Criteria and assumptions
@@ -43,33 +47,49 @@ This is **tamper-evident, not tamper-proof**. It shows the sequence has not been
 
 | | |
 |---|---|
-| Total records | 24 |
-| Chain head | `0c74705cc1bb35ec` |
-| Last updated | 2026-09-01 04:37:33 ET |
+| Total records | 468 |
+| Chain head | `51ef406ee3e203e3` |
+| Last updated | 2026-09-01 16:12:33 ET |
 
 ## Most recent 40 decisions
 
-- `[simulated]` 08:37:22 · `stop` 
-- `[simulated]` 08:37:22 · `market_closed` next_open=2026-09-01T09:30:00-04:00
-- `[simulated]` 08:37:21 · `start` 
-- `[simulated]` 08:36:10 · `stop` 
-- `[simulated]` 08:36:10 · `market_closed` next_open=2026-09-01T09:30:00-04:00
-- `[simulated]` 08:36:09 · `start` 
-- `[simulated]` 03:40:37 · `closed` credit=1.0 captured_frac=0.85
-- `[simulated]` 03:40:36 · `holding` captured_frac=-0.154
-- `[simulated]` 03:40:34 · `opened` coid=mp-c3e8cbf838d64ea72e252667119c credit=0.13 required_win_rate=0.87 contracts=1
-- `[simulated]` 03:40:34 · `proposal` credit=0.13 required_win_rate=0.87 contracts=1
-- `[evaluation]` 03:40:34 · put-credit-vertical · proposed 1 → **PASS** 1 · gate `—`
-- `[simulated]` 03:40:27 · `session_open` 
-- `[simulated]` 03:40:27 · `anchor` 
-- `[simulated]` 03:32:22 · `proposal` gate=G10-duplicate credit=0.13 required_win_rate=0.87 contracts=0
-- `[evaluation]` 03:32:22 · put-credit-vertical · proposed 1 → **REJECT** 0 · gate `G10-duplicate`
-- `[simulated]` 03:32:13 · `opened` coid=mp-c3e8cbf838d64ea72e252667119c credit=0.13 required_win_rate=0.87 contracts=1
-- `[simulated]` 03:32:13 · `proposal` credit=0.13 required_win_rate=0.87 contracts=1
-- `[evaluation]` 03:32:13 · put-credit-vertical · proposed 1 → **PASS** 1 · gate `—`
-- `[simulated]` 03:32:07 · `session_open` 
-- `[simulated]` 03:32:07 · `anchor` 
-- `[simulated]` 03:31:43 · `stop` 
-- `[simulated]` 03:31:43 · `market_closed` next_open=2026-09-01T09:30:00-04:00
-- `[simulated]` 03:31:40 · `market_closed` next_open=2026-09-01T09:30:00-04:00
-- `[simulated]` 03:31:39 · `start` 
+- `[paper]` 20:00:59 · `stop` 
+- `[paper]` 20:00:59 · `session_end` reason=reached 16:00 ET
+- `[paper]` 19:16:19 · `flatten` reason=past 15:15 ET
+- `[paper]` 19:15:11 · `outside_window` 
+- `[paper]` 19:13:47 · `outside_window` 
+- `[paper]` 19:12:22 · `outside_window` 
+- `[paper]` 19:10:58 · `outside_window` 
+- `[paper]` 19:09:47 · `outside_window` 
+- `[paper]` 19:08:29 · `outside_window` 
+- `[paper]` 19:06:55 · `outside_window` 
+- `[paper]` 19:05:30 · `outside_window` 
+- `[paper]` 19:03:26 · `outside_window` 
+- `[paper]` 19:00:46 · `outside_window` 
+- `[paper]` 18:59:22 · `outside_window` 
+- `[paper]` 18:57:57 · `outside_window` 
+- `[paper]` 18:56:50 · `outside_window` 
+- `[paper]` 18:53:53 · `outside_window` 
+- `[paper]` 18:52:29 · `outside_window` 
+- `[paper]` 18:51:07 · `outside_window` 
+- `[paper]` 18:49:43 · `outside_window` 
+- `[paper]` 18:48:29 · `outside_window` 
+- `[paper]` 18:47:20 · `outside_window` 
+- `[paper]` 18:45:00 · `outside_window` 
+- `[paper]` 18:43:29 · `outside_window` 
+- `[paper]` 18:42:05 · `outside_window` 
+- `[paper]` 18:40:57 · `outside_window` 
+- `[paper]` 18:35:29 · `outside_window` 
+- `[paper]` 18:31:08 · `outside_window` 
+- `[paper]` 18:29:33 · `outside_window` 
+- `[paper]` 18:28:08 · `outside_window` 
+- `[paper]` 18:27:04 · `outside_window` 
+- `[paper]` 18:21:17 · `outside_window` 
+- `[paper]` 18:19:25 · `outside_window` 
+- `[paper]` 18:17:50 · `outside_window` 
+- `[paper]` 18:16:23 · `outside_window` 
+- `[paper]` 18:14:58 · `outside_window` 
+- `[paper]` 18:13:34 · `outside_window` 
+- `[paper]` 18:12:27 · `outside_window` 
+- `[paper]` 18:11:21 · `outside_window` 
+- `[paper]` 18:09:57 · `outside_window` 
