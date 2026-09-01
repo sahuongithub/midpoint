@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-01T08:01:49.981310Z",
+ "generated": "2026-09-01T20:12:32.990468Z",
  "method": "microprice = (Vb*Pa + Va*Pb)/(Vb+Va) from the free feed, compared against the true NBBO mid recovered by paid marketable orders",
  "n": 64,
  "excluded": {

@@ -1,11 +1,11 @@
 {
  "date": "2026-09-01",
  "account": "PA3TD7HMABNH",
- "equity": 96690.08,
- "broker_day_pnl": 290.35,
+ "equity": 96657.93,
+ "broker_day_pnl": 258.2,
  "agent": {
-  "fills": 12,
-  "net_cash": 24.0
+  "fills": 18,
+  "net_cash": -23.0
  },
  "research": {
   "fills": 6,
