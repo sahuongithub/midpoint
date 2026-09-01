@@ -9,7 +9,7 @@ Every decision this agent made, published as it ran. Refusals included — espec
 | Tier | What it means | Records | Orders opened | Positions closed | Refused |
 |---|---|---|---|---|---|
 | **paper** | real order, real quote, simulated money | 0 | 0 | 0 | — |
-| **simulated** | dry run — no order left the machine | 15 | 2 | 1 | — |
+| **simulated** | dry run — no order left the machine | 21 | 2 | 1 | — |
 | **evaluation** | risk-kernel decision; no order implied | 3 | — | — | 1 |
 
 Refusals are counted from the risk kernel's own records only. The agent journals the same decision from its side, and counting both would double every one.
@@ -43,12 +43,18 @@ This is **tamper-evident, not tamper-proof**. It shows the sequence has not been
 
 | | |
 |---|---|
-| Total records | 18 |
-| Chain head | `b1c58cfc01e94f60` |
-| Last updated | 2026-09-01 01:07:30 ET |
+| Total records | 24 |
+| Chain head | `0c74705cc1bb35ec` |
+| Last updated | 2026-09-01 04:37:33 ET |
 
 ## Most recent 40 decisions
 
+- `[simulated]` 08:37:22 · `stop` 
+- `[simulated]` 08:37:22 · `market_closed` next_open=2026-09-01T09:30:00-04:00
+- `[simulated]` 08:37:21 · `start` 
+- `[simulated]` 08:36:10 · `stop` 
+- `[simulated]` 08:36:10 · `market_closed` next_open=2026-09-01T09:30:00-04:00
+- `[simulated]` 08:36:09 · `start` 
 - `[simulated]` 03:40:37 · `closed` credit=1.0 captured_frac=0.85
 - `[simulated]` 03:40:36 · `holding` captured_frac=-0.154
 - `[simulated]` 03:40:34 · `opened` coid=mp-c3e8cbf838d64ea72e252667119c credit=0.13 required_win_rate=0.87 contracts=1
