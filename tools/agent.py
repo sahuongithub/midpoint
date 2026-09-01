@@ -291,6 +291,17 @@ class Agent:
             if n:
                 st = self.exec.reconcile(); positions = st["positions"]
 
+        # The kill switch, checked every cycle rather than only when a proposal happens
+        # to reach the kernel. Pulling it must stop the agent taking on NEW risk
+        # immediately and visibly -- but it deliberately does not stop the manage and
+        # flatten paths above, because closing a position reduces risk and a stop that
+        # traps you in a trade is not a safety feature.
+        halt = os.path.expanduser(self.kernel.cfg.kill_switch_path)
+        if os.path.exists(halt):
+            self._journal("halted", reason="kill switch present", path=halt,
+                          note="managing and flattening still permitted; opening stopped")
+            return "halted"
+
         regime = sig.read_regime()
         if not regime.short_premium_ok:
             self._journal("stand_down", reason=regime.explain(), ratio=regime.ratio)

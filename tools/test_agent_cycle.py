@@ -129,6 +129,22 @@ a = build_agent(tmp, positions=LEGS * 3, structures=[S1, S2, dict(S1, short="X",
                 close_price=0.19)
 ck("three spreads IS at capacity", a.run_cycle() == "at_capacity")
 
+print("\n4b. the kill switch stops opening but never traps an open position")
+import os as _os
+halt = _os.path.join(tmp, "HALT")
+a = build_agent(tmp, positions=LEGS, structures=[S1], close_price=0.05)  # 75% captured
+a.kernel.cfg.kill_switch_path = halt
+open(halt, "w").write("stop")
+r = a.run_cycle()
+ck("returns halted", r == "halted", r)
+ck("but still closed the position that hit its target",
+   len(a.exec.closed) == 1, str(a.exec.closed))
+ck("journalled the halt", any(e == "halted" for e, _ in a.events))
+a2 = build_agent(tmp, structures=[], close_price=None)
+a2.kernel.cfg.kill_switch_path = halt
+ck("with nothing open it simply halts", a2.run_cycle() == "halted")
+_os.remove(halt)
+
 print("\n5. a position short of its target is held, not closed")
 a = build_agent(tmp, positions=LEGS, structures=[S1], close_price=0.15)   # 25% captured
 a.run_cycle()
