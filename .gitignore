@@ -1,0 +1,12 @@
+# never commit credentials
+*.env
+.env
+config/*.local.json
+**/secrets*
+# large recorded data
+docs/*.jsonl
+docs/fv_study.json
+__pycache__/
+*.pyc
+.DS_Store
+bin/alpaca

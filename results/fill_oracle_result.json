@@ -1,0 +1,72 @@
+{
+  "run_utc": "2026-08-31T16:43:57.097562+00:00",
+  "account": "PA3TD7HMABNH",
+  "underlying": "SPY",
+  "spot": 765.35,
+  "contract": "SPY260908C00765000",
+  "expiry": "2026-09-08",
+  "strike": "765",
+  "indicative_quote": {
+    "bid": 5.02,
+    "ask": 5.04,
+    "ts": "2026-08-31T16:39:45.988089884Z"
+  },
+  "probes": [
+    {
+      "pad": -0.5,
+      "limit": 4.55,
+      "status": "new",
+      "fill": null,
+      "delta_fill_minus_limit": null,
+      "delta_fill_minus_indicative_ask": null,
+      "latency_s": null
+    },
+    {
+      "pad": 0.01,
+      "limit": 5.05,
+      "status": "filled",
+      "fill": 5.02,
+      "delta_fill_minus_limit": -0.03,
+      "delta_fill_minus_indicative_ask": -0.02,
+      "latency_s": 2.1
+    },
+    {
+      "pad": 0.05,
+      "limit": 5.1,
+      "status": "filled",
+      "fill": 5.01,
+      "delta_fill_minus_limit": -0.09,
+      "delta_fill_minus_indicative_ask": -0.03,
+      "latency_s": 3.3
+    },
+    {
+      "pad": 0.15,
+      "limit": 5.2,
+      "status": "filled",
+      "fill": 5.02,
+      "delta_fill_minus_limit": -0.18,
+      "delta_fill_minus_indicative_ask": -0.02,
+      "latency_s": 4.4
+    },
+    {
+      "pad": 0.4,
+      "limit": 5.45,
+      "status": "filled",
+      "fill": 5.02,
+      "delta_fill_minus_limit": -0.43,
+      "delta_fill_minus_indicative_ask": -0.02,
+      "latency_s": 5.4
+    },
+    {
+      "pad": 1.0,
+      "limit": 6.05,
+      "status": "filled",
+      "fill": 5.01,
+      "delta_fill_minus_limit": -1.04,
+      "delta_fill_minus_indicative_ask": -0.03,
+      "latency_s": 6.5
+    }
+  ],
+  "verdict": "PARTIAL-IMPROVEMENT",
+  "explanation": "Fills came in below their limits but did not agree on one price. Likely genuine price improvement against a moving quote. Treat each fill as an upper bound on the true ask at its own timestamp and calibrate the residual against OPRA."
+}

@@ -1,0 +1,21 @@
+{
+  "competition_account": "PA32CGA2U1DY",
+  "daily_loss_limit_frac": 0.01,
+  "duplicate_window_s": 60.0,
+  "flatten_expiring_by_et": "15:15",
+  "hard_close_et": "15:50",
+  "kill_switch_path": "~/midpoint/HALT",
+  "max_consecutive_rejects": 25,
+  "max_contracts_per_order": 10,
+  "max_drawdown_frac": 0.025,
+  "max_notional_per_order": 15000.0,
+  "max_open_risk_frac": 0.015,
+  "max_orders_per_min": 20,
+  "max_orders_per_session": 400,
+  "max_quoted_width": 0.2,
+  "max_trade_loss_frac": 0.0025,
+  "no_open_0dte_after_et": "14:00",
+  "price_collar_frac": 0.1,
+  "require_defined_risk": true,
+  "require_long_leg_first": true
+}

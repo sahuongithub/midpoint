@@ -1,0 +1,303 @@
+{
+  "config": {
+    "yes": true,
+    "trials": 10,
+    "underlying": "SPY",
+    "dte_lo": 0,
+    "dte_hi": 2,
+    "deadline": 45.0,
+    "threshold": 0.02,
+    "poll": 1.5,
+    "out": "/Users/sahu/midpoint/docs/paired_arm.json"
+  },
+  "trials": [
+    {
+      "osi": "SPY260831C00766000",
+      "underlying": "SPY",
+      "dte": 0,
+      "greeks_src": "ours",
+      "S0": 766.29,
+      "mid0": 0.865,
+      "ind_bid": 0.86,
+      "ind_ask": 0.87,
+      "delta": 0.5651,
+      "gamma": 0.220939,
+      "A": {
+        "fill": 0.85,
+        "S": 766.3,
+        "fv": 0.8707,
+        "cost": -0.0207,
+        "wait_s": 0.0
+      },
+      "B": {
+        "fill": 0.87,
+        "S": 766.33,
+        "fv": 0.8878,
+        "cost": -0.0178,
+        "wait_s": 9.2,
+        "trigger": "favourable"
+      },
+      "ts": "2026-08-31T17:49:04.441985+00:00"
+    },
+    {
+      "osi": "SPY260831C00766000",
+      "underlying": "SPY",
+      "dte": 0,
+      "greeks_src": "ours",
+      "S0": 766.33,
+      "mid0": 0.855,
+      "ind_bid": 0.83,
+      "ind_ask": 0.88,
+      "delta": 0.5775,
+      "gamma": 0.230506,
+      "A": {
+        "fill": 0.86,
+        "S": 766.33,
+        "fv": 0.855,
+        "cost": 0.005,
+        "wait_s": 0.0
+      },
+      "B": {
+        "fill": 0.93,
+        "S": 766.43,
+        "fv": 0.9139,
+        "cost": 0.0161,
+        "wait_s": 9.1,
+        "trigger": "favourable"
+      },
+      "ts": "2026-08-31T17:49:19.602771+00:00"
+    },
+    {
+      "osi": "SPY260831C00766000",
+      "underlying": "SPY",
+      "dte": 0,
+      "greeks_src": "ours",
+      "S0": 766.43,
+      "mid0": 0.925,
+      "ind_bid": 0.9,
+      "ind_ask": 0.95,
+      "delta": 0.5988,
+      "gamma": 0.223896,
+      "A": {
+        "fill": 0.93,
+        "S": 766.43,
+        "fv": 0.925,
+        "cost": 0.005,
+        "wait_s": 0.0
+      },
+      "B": {
+        "fill": 0.88,
+        "S": 766.37,
+        "fv": 0.8895,
+        "cost": -0.0095,
+        "wait_s": 50.6,
+        "trigger": "deadline"
+      },
+      "ts": "2026-08-31T17:50:16.526203+00:00"
+    },
+    {
+      "osi": "SPY260831C00766000",
+      "underlying": "SPY",
+      "dte": 0,
+      "greeks_src": "ours",
+      "S0": 766.46,
+      "mid0": 0.965,
+      "ind_bid": 0.96,
+      "ind_ask": 0.97,
+      "delta": 0.6022,
+      "gamma": 0.216252,
+      "A": {
+        "fill": 0.95,
+        "S": 766.44,
+        "fv": 0.953,
+        "cost": -0.003,
+        "wait_s": 0.0
+      },
+      "B": {
+        "fill": 0.98,
+        "S": 766.51,
+        "fv": 0.9954,
+        "cost": -0.0154,
+        "wait_s": 11.8,
+        "trigger": "favourable"
+      },
+      "ts": "2026-08-31T17:50:34.607702+00:00"
+    },
+    {
+      "osi": "SPY260831C00766000",
+      "underlying": "SPY",
+      "dte": 0,
+      "greeks_src": "ours",
+      "S0": 766.59,
+      "mid0": 1.065,
+      "ind_bid": 1.06,
+      "ind_ask": 1.07,
+      "delta": 0.6265,
+      "gamma": 0.206183,
+      "A": {
+        "fill": 1.04,
+        "S": 766.595,
+        "fv": 1.0681,
+        "cost": -0.0281,
+        "wait_s": 0.0
+      },
+      "B": {
+        "fill": 1.11,
+        "S": 766.675,
+        "fv": 1.119,
+        "cost": -0.009,
+        "wait_s": 6.9,
+        "trigger": "favourable"
+      },
+      "ts": "2026-08-31T17:50:47.833782+00:00"
+    },
+    {
+      "osi": "SPY260831C00766000",
+      "underlying": "SPY",
+      "dte": 0,
+      "greeks_src": "ours",
+      "S0": 766.675,
+      "mid0": 1.105,
+      "ind_bid": 1.1,
+      "ind_ask": 1.11,
+      "delta": 0.6467,
+      "gamma": 0.206538,
+      "A": {
+        "fill": 1.08,
+        "S": 766.67,
+        "fv": 1.1018,
+        "cost": -0.0218,
+        "wait_s": 0.0
+      },
+      "B": {
+        "fill": 1.12,
+        "S": 766.69,
+        "fv": 1.1147,
+        "cost": 0.0053,
+        "wait_s": 50.9,
+        "trigger": "deadline"
+      },
+      "ts": "2026-08-31T17:51:44.883780+00:00"
+    },
+    {
+      "osi": "SPY260831C00766000",
+      "underlying": "SPY",
+      "dte": 0,
+      "greeks_src": "ours",
+      "S0": 766.69,
+      "mid0": 1.125,
+      "ind_bid": 1.12,
+      "ind_ask": 1.13,
+      "delta": 0.6477,
+      "gamma": 0.203207,
+      "A": {
+        "fill": 1.1,
+        "S": 766.67,
+        "fv": 1.1121,
+        "cost": -0.0121,
+        "wait_s": 0.0
+      },
+      "B": {
+        "fill": 1.15,
+        "S": 766.75,
+        "fv": 1.1642,
+        "cost": -0.0142,
+        "wait_s": 32.8,
+        "trigger": "favourable"
+      },
+      "ts": "2026-08-31T17:52:23.909781+00:00"
+    },
+    {
+      "osi": "SPY260831C00766000",
+      "underlying": "SPY",
+      "dte": 0,
+      "greeks_src": "ours",
+      "S0": 766.75,
+      "mid0": 1.12,
+      "ind_bid": 1.11,
+      "ind_ask": 1.13,
+      "delta": 0.6704,
+      "gamma": 0.212189,
+      "A": {
+        "fill": 1.12,
+        "S": 766.7,
+        "fv": 1.0867,
+        "cost": 0.0333,
+        "wait_s": 0.0
+      },
+      "B": {
+        "fill": 1.09,
+        "S": 766.66,
+        "fv": 1.0605,
+        "cost": 0.0295,
+        "wait_s": 51.1,
+        "trigger": "deadline"
+      },
+      "ts": "2026-08-31T17:53:21.384921+00:00"
+    },
+    {
+      "osi": "SPY260831C00766000",
+      "underlying": "SPY",
+      "dte": 0,
+      "greeks_src": "ours",
+      "S0": 766.68,
+      "mid0": 1.095,
+      "ind_bid": 1.09,
+      "ind_ask": 1.1,
+      "delta": 0.6506,
+      "gamma": 0.209882,
+      "A": {
+        "fill": 1.09,
+        "S": 766.68,
+        "fv": 1.095,
+        "cost": -0.005,
+        "wait_s": 0.0
+      },
+      "B": {
+        "fill": 1.12,
+        "S": 766.71,
+        "fv": 1.1146,
+        "cost": 0.0054,
+        "wait_s": 11.9,
+        "trigger": "favourable"
+      },
+      "ts": "2026-08-31T17:53:39.471786+00:00"
+    },
+    {
+      "osi": "SPY260831C00766000",
+      "underlying": "SPY",
+      "dte": 0,
+      "greeks_src": "ours",
+      "S0": 766.7,
+      "mid0": 1.145,
+      "ind_bid": 1.14,
+      "ind_ask": 1.15,
+      "delta": 0.6469,
+      "gamma": 0.199384,
+      "A": {
+        "fill": 1.12,
+        "S": 766.7,
+        "fv": 1.145,
+        "cost": -0.025,
+        "wait_s": 0.0
+      },
+      "B": {
+        "fill": 1.13,
+        "S": 766.75,
+        "fv": 1.1776,
+        "cost": -0.0476,
+        "wait_s": 29.9,
+        "trigger": "favourable"
+      },
+      "ts": "2026-08-31T17:54:15.610446+00:00"
+    }
+  ],
+  "summary": {
+    "n": 10,
+    "mean_A": -0.007239999999999999,
+    "mean_B": -0.00572,
+    "diff": 0.0015199999999999983,
+    "t": 0.30677238817229446,
+    "favourable": 7
+  }
+}
