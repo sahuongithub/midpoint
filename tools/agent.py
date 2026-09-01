@@ -46,8 +46,23 @@ from structure import build_vertical
 from risk_kernel import RiskKernel, RiskConfig, AccountState, REJECT, SHRINK
 from executor import Executor, VerticalSpread, ExecError
 
-STATE_PATH = os.path.expanduser("~/midpoint/docs/agent_state.json")
-JOURNAL = os.path.expanduser("~/midpoint/docs/agent.jsonl")
+def _scoped(name: str, ext: str) -> str:
+    """One set of books per account.
+
+    State and journals are per-account facts: open structures, the equity peak the
+    drawdown gate measures from, the day's starting equity. Two sessions on two
+    accounts sharing one state file would overwrite each other's positions and
+    anchor each other's risk limits to the wrong equity. Naming the files after the
+    account keeps the judged record and the research record entirely separate, which
+    is also what makes the judged equity curve readable.
+    """
+    acct = os.environ.get("MIDPOINT_ALLOWED_ACCOUNT")
+    stem = "%s.%s" % (name, acct) if acct else name
+    return os.path.expanduser("~/midpoint/docs/%s%s" % (stem, ext))
+
+
+STATE_PATH = _scoped("agent_state", ".json")
+JOURNAL = _scoped("agent", ".jsonl")
 
 
 @dataclass
@@ -76,9 +91,10 @@ def _mins(s):
 
 class Agent:
     def __init__(self, cfg: AgentConfig, risk: RiskConfig,
-                 dry_run: bool = True, state_path: str = STATE_PATH):
+                 dry_run: bool = True, state_path: str = STATE_PATH,
+                 risk_journal: str = None):
         self.cfg, self.dry_run = cfg, dry_run
-        self.kernel = RiskKernel(risk)
+        self.kernel = RiskKernel(risk, journal_path=risk_journal)
         self.exec = Executor(dry_run=dry_run)
         self.state_path = os.path.expanduser(state_path)
         os.makedirs(os.path.dirname(self.state_path), exist_ok=True)
@@ -436,7 +452,8 @@ def main():
 
     risk = RiskConfig(**json.load(open(os.path.expanduser("~/midpoint/config/risk.json"))))
     cfg = AgentConfig(cycle_seconds=a.cycle_seconds, contracts=a.contracts)
-    agent = Agent(cfg, risk, dry_run=not a.live)
+    agent = Agent(cfg, risk, dry_run=not a.live,
+                  risk_journal=_scoped("risk_decisions", ".jsonl"))
     print("Midpoint agent | %s | %s" % ("LIVE" if a.live else "DRY RUN",
                                         _et_now().strftime("%Y-%m-%d %H:%M ET")))
     agent.run(cycles=None if a.until_et else a.cycles, until_et=a.until_et)

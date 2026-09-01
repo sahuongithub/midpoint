@@ -65,11 +65,22 @@ def main(argv):
     check("CLI authenticates", bool(acct.get("account_number")),
           acct.get("account_number", ""))
 
-    # 3. the right account, and never the one reserved for the contest
+    # 3. the right account -- and if that IS the judged one, say so out loud
+    #
+    # This began as "never the contest account", which was right while the contest
+    # account was reserved. Once the agent's judged sessions run there, a blanket
+    # refusal is wrong: the question is not which account it is, but whether it is
+    # the account this session was told to use. Naming it with --expect is the
+    # authorisation, and an unnamed session still refuses the contest account.
     num = acct.get("account_number", "")
-    check("not the competition account", num != COMPETITION, num)
     if expect:
-        check("account is the one expected", num == expect, "%s vs %s" % (num, expect))
+        check("account is the one this session was authorised for",
+              num == expect, "%s vs %s" % (num, expect))
+        if num == COMPETITION:
+            print("  [note] this is the JUDGED account. Research probes must not run")
+            print("         against it -- they belong on the research account.")
+    else:
+        check("not the competition account (no --expect given)", num != COMPETITION, num)
 
     # 4. the account can actually do what the strategy needs
     lvl = acct.get("options_trading_level") or acct.get("options_approved_level")

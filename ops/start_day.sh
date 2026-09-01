@@ -82,12 +82,28 @@ echo "  pre-flight clear"
 
 # --- 3. the agent --------------------------------------------------------
 echo ""
-if pgrep -f "tools/agent.py --live" > /dev/null; then
-  echo "  agent already running -- leaving it alone"
+# "is an agent running" is the wrong question when there are two accounts: both
+# sessions have identical command lines and differ only by environment. Ask
+# instead whether an agent is running FOR THIS ACCOUNT, tracked by a pid file.
+PIDFILE="$ROOT/ops/run/agent.$EXPECT.pid"
+mkdir -p "$ROOT/ops/run"
+RUNNING="no"
+if [ -f "$PIDFILE" ]; then
+  OLDPID=$(cat "$PIDFILE" 2>/dev/null)
+  if [ -n "$OLDPID" ] && kill -0 "$OLDPID" 2>/dev/null; then
+    RUNNING="yes"
+  else
+    rm -f "$PIDFILE"      # stale: the process is gone
+  fi
+fi
+
+if [ "$RUNNING" = "yes" ]; then
+  echo "  agent already running for $EXPECT -- leaving it alone"
 else
   MIDPOINT_ALLOWED_ACCOUNT="$EXPECT" MIDPOINT_ENV="$ENVFILE" \
     nohup ./ops/run_session.sh "$ET_DATE" --live --cycle-seconds 60 --until-et 16:00 \
     > "$LOG/session.$STAMP.log" 2>&1 &
+  echo $! > "$PIDFILE"
   echo "  agent started        -> trades until 16:00 ET, flattens at 15:15"
 fi
 
@@ -103,8 +119,11 @@ fi
 sleep 8
 echo ""
 echo "  ----------------------------------------------------------------"
-pgrep -f "tools/agent.py --live" > /dev/null \
-  && echo "  agent        RUNNING" || echo "  agent        FAILED TO START -- see $LOG"
+if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+  echo "  agent        RUNNING for $EXPECT"
+else
+  echo "  agent        FAILED TO START -- see $LOG"
+fi
 pgrep -f "tools/spread_curve.py" > /dev/null \
   && echo "  spread curve RUNNING" || echo "  spread curve not running"
 echo "  ----------------------------------------------------------------"

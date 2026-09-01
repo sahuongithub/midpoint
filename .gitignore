@@ -19,3 +19,4 @@ research/
 ops/logs/
 # local settlement lookups
 results/settlement_cache.json
+ops/run/
