@@ -42,6 +42,88 @@ var money0 = function(v){ return (v<0?"-$":"$") + Math.round(Math.abs(v)); };
   render(88);
 })();
 
+/* ---------- 2. the trade grader: the only part a stranger can point at their own trade ----------
+   Bands are not invented. They are the measured cost of the 65 contracts we probed,
+   grouped by the quoted width a trader can see BEFORE trading. Quoted width is an
+   unreliable estimate of the true spread -- we measured that -- but it ranked
+   contracts almost perfectly, which is exactly what a screening rule needs. ------- */
+(function(){
+  var B=$("tgB"), A=$("tgA"), N=$("tgN"), host=$("tgBands");
+  if(!B||!A) return;
+
+  var BANDS = [
+    {lo:0,    hi:0.05, label:"under $0.05", n:25, med:1,   worst:10,  cls:"good"},
+    {lo:0.05, hi:0.10, label:"$0.05–0.10",  n:12, med:2,   worst:10,  cls:"good"},
+    {lo:0.10, hi:0.20, label:"$0.10–0.20",  n:10, med:20,  worst:30,  cls:"warn"},
+    {lo:0.20, hi:0.50, label:"$0.20–0.50",  n:12, med:25,  worst:58,  cls:"bad"},
+    {lo:0.50, hi:1e9,  label:"over $0.50",  n:6,  med:318, worst:347, cls:"bad"}
+  ];
+  var VERDICT = {
+    good:{t:"CHEAP TO TRADE",  d:"This is the liquid end of the market. The toll here is small enough to ignore."},
+    warn:{t:"GETTING EXPENSIVE", d:"You are at the edge of our measured rule. Check whether a nearby strike is tighter."},
+    bad :{t:"EXPENSIVE — CHECK A NEARBY STRIKE", d:"Contracts quoted this wide were, in our measurements, where the real damage lived."}
+  };
+
+  function bandFor(w){
+    for(var i=0;i<BANDS.length;i++) if(w>=BANDS[i].lo && w<BANDS[i].hi) return BANDS[i];
+    return BANDS[BANDS.length-1];
+  }
+
+  function drawBands(active){
+    var html = "";
+    for(var i=0;i<BANDS.length;i++){
+      var b=BANDS[i], on = (b===active);
+      html += '<div class="band '+b.cls+(on?" on":"")+'">'
+            +   '<div class="bl">'+b.label+'</div>'
+            +   '<div class="bv">'+(b.med<0?"-$":"$")+Math.abs(b.med)+'</div>'
+            +   '<div class="bn">worst $'+b.worst+'</div>'
+            + '</div>';
+    }
+    host.innerHTML = html;
+  }
+
+  function calc(){
+    var bid=parseFloat(B.value), ask=parseFloat(A.value), n=Math.max(1,parseInt(N.value,10)||1);
+    var v=$("tgVerdict");
+    if(!(bid>0)||!(ask>0)||ask<bid){
+      v.className="verdict"; v.innerHTML="<b>Enter a bid and an ask.</b> The ask is the higher number.";
+      $("tgCost").textContent="—"; $("tgPct").textContent="—";
+      $("tgBE").textContent="—"; $("tgGate").textContent="—";
+      $("tgNote").textContent=""; drawBands(null); return;
+    }
+    var w = ask-bid, mid=(ask+bid)/2;
+    var perContract = w*100, total = perContract*n;
+    var pct = w/mid*100;              /* the toll as a share of what you are paying */
+    var be  = w/mid*100;              /* buy at ask, sell at bid: same number, stated as a move */
+    var band = bandFor(w), vd = VERDICT[band.cls];
+
+    v.className = "verdict "+band.cls;
+    v.innerHTML = '<span class="vt">'+vd.t+'</span><span class="vd">'+vd.d+'</span>';
+
+    $("tgCost").textContent = (total<10? "$"+total.toFixed(2) : "$"+Math.round(total));
+    $("tgCost").className = "v "+(band.cls==="good"?"good":"cost");
+    $("tgPct").textContent = pct.toFixed(1)+"%";
+    $("tgBE").textContent  = be.toFixed(1)+"%";
+    var passes = w<=0.20;
+    $("tgGate").textContent = passes ? "TRADE" : "SKIP";
+    $("tgGate").className = "v "+(passes?"good":"cost");
+
+    drawBands(band);
+
+    var note = "A gap of <b>$"+w.toFixed(2)+"</b> costs <b>$"+perContract.toFixed(2)+
+      "</b> per contract to get in and back out"+(n>1? ", or <b>$"+Math.round(total)+"</b> for "+n+" contracts":"")+
+      ". In our measurements, contracts quoted <b>"+band.label+"</b> wide cost a median of <b>$"+band.med+
+      "</b> and as much as <b>$"+band.worst+"</b> in real money.";
+    if(!passes) note += " This one is <b>outside the $0.20 rule we pre-registered</b> — the same rule that, "+
+      "tested on 48 contracts it had never seen, never let through a trap costing over $50.";
+    else note += " It is <b>inside the $0.20 rule we pre-registered</b>.";
+    $("tgNote").innerHTML = note;
+  }
+
+  [B,A,N].forEach(function(i){ i.addEventListener("input",calc); });
+  calc();
+})();
+
 /* ---------- 2. strike explorer: the 347x range on one underlying ---------- */
 (function(){
   var rows = DATA.contracts, U=$("fU"), E=$("fE"), M=$("fM"), bars=$("bars");

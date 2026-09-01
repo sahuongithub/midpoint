@@ -15,6 +15,7 @@
   --rule:#E3E5EC; --rule-2:#CBCEDA;
   --indigo:#3341B8; --indigo-soft:#EAECFA;
   --clay:#C13A28; --clay-soft:#FBEBE8;
+  --amber:#9A5A12; --amber-soft:#FBF0DF;
   --green:#0E7355; --green-soft:#E4F3EE;
   --shadow:0 1px 2px rgba(18,20,26,.05),0 12px 32px -16px rgba(18,20,26,.22);
 }
@@ -24,6 +25,7 @@
   --rule:#242833; --rule-2:#343A48;
   --indigo:#8B96F0; --indigo-soft:#1B1F3A;
   --clay:#F0836C; --clay-soft:#2E1A16;
+  --amber:#E0A957; --amber-soft:#2C2314;
   --green:#5DC6A0; --green-soft:#12291F;
   --shadow:0 1px 2px rgba(0,0,0,.5),0 12px 32px -16px rgba(0,0,0,.7);
 }}
@@ -33,6 +35,7 @@
   --rule:#242833; --rule-2:#343A48;
   --indigo:#8B96F0; --indigo-soft:#1B1F3A;
   --clay:#F0836C; --clay-soft:#2E1A16;
+  --amber:#E0A957; --amber-soft:#2C2314;
   --green:#5DC6A0; --green-soft:#12291F;
   --shadow:0 1px 2px rgba(0,0,0,.5),0 12px 32px -16px rgba(0,0,0,.7);
 }
@@ -163,6 +166,27 @@ footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
 @media (max-width:620px){.wrap{padding:0 16px 80px}.demo-body{padding:18px 15px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 :focus-visible{outline:2.5px solid var(--indigo);outline-offset:2px;border-radius:4px}
+
+/* trade grader */
+.verdict{border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:5px;
+  border:1px solid var(--rule);background:var(--surface-2)}
+.verdict .vt{font-family:"Bricolage Grotesque","Public Sans",sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:.01em}
+.verdict .vd{font-size:.92rem;color:var(--ink-2)}
+.verdict.good{background:var(--green-soft);border-color:var(--green)}
+.verdict.good .vt{color:var(--green)}
+.verdict.warn{background:var(--amber-soft);border-color:var(--amber)}
+.verdict.warn .vt{color:var(--amber)}
+.verdict.bad{background:var(--clay-soft);border-color:var(--clay)}
+.verdict.bad .vt{color:var(--clay)}
+.bandbar{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.band{border:1px solid var(--rule);border-radius:8px;padding:10px 8px;text-align:center;
+  background:var(--surface-2);opacity:.5;transition:opacity .15s ease,transform .15s ease}
+.band.on{opacity:1;transform:translateY(-2px);box-shadow:0 6px 18px -12px rgba(0,0,0,.5)}
+.band .bl{font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.band .bv{font-family:"Bricolage Grotesque","Public Sans",sans-serif;font-weight:700;font-size:1.15rem;margin-top:3px}
+.band .bn{font-size:.68rem;color:var(--ink-3);margin-top:2px}
+.band.good .bv{color:var(--green)} .band.warn .bv{color:var(--amber)} .band.bad .bv{color:var(--clay)}
+@media(max-width:620px){.bandbar{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -218,8 +242,59 @@ footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
   </div></details>
 </section>
 
+<section id="grader">
+  <div class="eyebrow">02 — the tool</div>
+  <h2>Now check your own trade</h2>
+  <p class="lede" style="margin-top:14px;max-width:37em">Open your broker, find the contract you are about to
+  buy, and read off its bid and ask. Type them here. Nothing is sent anywhere — this runs entirely in your
+  browser, and it grades your contract against the 65 we measured on live markets.</p>
+
+  <div class="demo" style="margin-top:22px">
+    <div class="demo-head"><span class="tag">your trade</span><span class="t">What is this contract going to cost you?</span></div>
+    <div class="demo-body">
+      <div class="ctls">
+        <div><label class="ctl" for="tgB">Bid (what you can sell at)</label>
+          <input type="number" id="tgB" value="0.55" min="0.01" max="500" step="0.01"></div>
+        <div><label class="ctl" for="tgA">Ask (what you must pay)</label>
+          <input type="number" id="tgA" value="0.72" min="0.01" max="500" step="0.01"></div>
+        <div><label class="ctl" for="tgN">Contracts</label>
+          <input type="number" id="tgN" value="1" min="1" max="500" step="1"></div>
+      </div>
+
+      <div id="tgVerdict" class="verdict" style="margin-top:20px"></div>
+
+      <div class="readout" style="margin-top:18px">
+        <div><div class="k">In and out costs you</div><div class="v cost" id="tgCost">—</div></div>
+        <div><div class="k">That is this much of the price</div><div class="v" id="tgPct">—</div></div>
+        <div><div class="k">It must rise this much to break even</div><div class="v" id="tgBE">—</div></div>
+        <div><div class="k">Our measured rule says</div><div class="v" id="tgGate">—</div></div>
+      </div>
+
+      <div class="bandbar" id="tgBands" style="margin-top:22px"></div>
+      <div class="notice" id="tgNote" style="margin-top:16px"></div>
+    </div>
+  </div>
+
+  <details><summary>Where do I find the bid and the ask?</summary><div class="inner">
+    Every broker shows them on the options chain, usually side by side and labelled <b>Bid</b> and <b>Ask</b>
+    (sometimes "Sell" and "Buy", or "B" and "A"). They are the two prices that exist at the same moment: the
+    ask is what you pay to get in, the bid is what you receive to get out. If your broker shows only one
+    price, it is showing you the midpoint — a price neither side will actually give you.
+  </div></details>
+
+  <details><summary>What this can and cannot tell you</summary><div class="inner">
+    <b>It can</b> tell you what the quoted gap costs you in real money, and how that compares with 65 contracts
+    whose true cost we measured by paying it. That comparison is the useful part: quoted width is visible
+    before you trade, and in our data it ranked contracts almost perfectly.<br><br>
+    <b>It cannot</b> tell you the exact price you will get. We measured that the free feed's quoted width is
+    itself inaccurate — too narrow on busy contracts, too wide on quiet ones — so treat the dollar figure as
+    a well-grounded estimate and the band as the reliable signal. And it says nothing about whether the trade
+    is a good idea. It only prices the toll on the way in.
+  </div></details>
+</section>
+
 <section>
-  <div class="eyebrow">01b — where that gap actually goes</div>
+  <div class="eyebrow">02b — where that gap actually goes</div>
   <h2>You are paying three different people</h2>
   <p class="lede" style="margin-top:14px;max-width:37em">The gap is not a fee somebody set. It is the sum of
   three separate charges, and knowing which is which tells you when the gap is fair and when you are being
@@ -265,7 +340,7 @@ footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
 </section>
 
 <section>
-  <div class="eyebrow">02 — the centrepiece</div>
+  <div class="eyebrow">03 — the centrepiece</div>
   <h2>Pick a strike. See the bill.</h2>
   <p class="lede" style="margin-top:14px;max-width:36em">Every bar below is a real contract we bought and sold
   on the same afternoon, on the same underlying, to find out what it truly cost. Sorted cheapest to dearest.</p>
@@ -296,7 +371,7 @@ footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
 </section>
 
 <section>
-  <div class="eyebrow">03 — the trap</div>
+  <div class="eyebrow">04 — the trap</div>
   <h2>Same bet. 116× the cost.</h2>
   <p class="lede" style="margin-top:14px;max-width:36em">A deep in-the-money call moves almost exactly like
   100 shares. Traders use them as a substitute. Here is what the substitution costs.</p>
@@ -318,7 +393,7 @@ footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
 </section>
 
 <section>
-  <div class="eyebrow">03b — two myths worth killing first</div>
+  <div class="eyebrow">04b — two myths worth killing first</div>
   <h2>Things that sound true and aren't</h2>
 
   <div class="stack" style="margin-top:24px">
@@ -358,7 +433,7 @@ footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
 </section>
 
 <section>
-  <div class="eyebrow">04 — the number nobody computes</div>
+  <div class="eyebrow">05 — the number nobody computes</div>
   <h2>How often does this have to work?</h2>
   <p class="lede" style="margin-top:14px;max-width:36em">Selling an option pays you cash up front. It feels like
   free money. It isn't — the cash is priced against how likely you are to lose. Here's the honest arithmetic.</p>
@@ -389,7 +464,7 @@ footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
 </section>
 
 <section>
-  <div class="eyebrow">05 — why trust any of this</div>
+  <div class="eyebrow">06 — why trust any of this</div>
   <h2>We found a way to see the real price</h2>
   <p class="lede" style="margin-top:14px;max-width:36em">The free data feed is an approximation. So instead of
   trusting it, we sent six orders at the same instant, each offering a wildly different price, and watched what
@@ -411,7 +486,7 @@ footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
 </section>
 
 <section>
-  <div class="eyebrow">06 — we tested our own idea and it failed</div>
+  <div class="eyebrow">07 — we tested our own idea and it failed</div>
   <h2>Does waiting for a better moment help?</h2>
   <p class="lede" style="margin-top:14px;max-width:36em">The received wisdom is that patient traders get better
   prices. We ran it properly: ten pairs of identical trades, differing only in <em>when</em> the order went in.
@@ -440,7 +515,7 @@ footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
 </section>
 
 <section>
-  <div class="eyebrow">07 — one rule, measured</div>
+  <div class="eyebrow">08 — one rule, measured</div>
   <h2>The screen that would have caught it</h2>
   <p class="lede" style="margin-top:14px;max-width:36em">You can't see the real price before you trade. But the
   free feed's quoted gap, unreliable as its exact value is, ranks contracts almost perfectly. Drag the line and
@@ -821,6 +896,88 @@ var money0 = function(v){ return (v<0?"-$":"$") + Math.round(Math.abs(v)); };
     if(e.key==="ArrowRight"){ render(cur+4); e.preventDefault(); }
   });
   render(88);
+})();
+
+/* ---------- 2. the trade grader: the only part a stranger can point at their own trade ----------
+   Bands are not invented. They are the measured cost of the 65 contracts we probed,
+   grouped by the quoted width a trader can see BEFORE trading. Quoted width is an
+   unreliable estimate of the true spread -- we measured that -- but it ranked
+   contracts almost perfectly, which is exactly what a screening rule needs. ------- */
+(function(){
+  var B=$("tgB"), A=$("tgA"), N=$("tgN"), host=$("tgBands");
+  if(!B||!A) return;
+
+  var BANDS = [
+    {lo:0,    hi:0.05, label:"under $0.05", n:25, med:1,   worst:10,  cls:"good"},
+    {lo:0.05, hi:0.10, label:"$0.05–0.10",  n:12, med:2,   worst:10,  cls:"good"},
+    {lo:0.10, hi:0.20, label:"$0.10–0.20",  n:10, med:20,  worst:30,  cls:"warn"},
+    {lo:0.20, hi:0.50, label:"$0.20–0.50",  n:12, med:25,  worst:58,  cls:"bad"},
+    {lo:0.50, hi:1e9,  label:"over $0.50",  n:6,  med:318, worst:347, cls:"bad"}
+  ];
+  var VERDICT = {
+    good:{t:"CHEAP TO TRADE",  d:"This is the liquid end of the market. The toll here is small enough to ignore."},
+    warn:{t:"GETTING EXPENSIVE", d:"You are at the edge of our measured rule. Check whether a nearby strike is tighter."},
+    bad :{t:"EXPENSIVE — CHECK A NEARBY STRIKE", d:"Contracts quoted this wide were, in our measurements, where the real damage lived."}
+  };
+
+  function bandFor(w){
+    for(var i=0;i<BANDS.length;i++) if(w>=BANDS[i].lo && w<BANDS[i].hi) return BANDS[i];
+    return BANDS[BANDS.length-1];
+  }
+
+  function drawBands(active){
+    var html = "";
+    for(var i=0;i<BANDS.length;i++){
+      var b=BANDS[i], on = (b===active);
+      html += '<div class="band '+b.cls+(on?" on":"")+'">'
+            +   '<div class="bl">'+b.label+'</div>'
+            +   '<div class="bv">'+(b.med<0?"-$":"$")+Math.abs(b.med)+'</div>'
+            +   '<div class="bn">worst $'+b.worst+'</div>'
+            + '</div>';
+    }
+    host.innerHTML = html;
+  }
+
+  function calc(){
+    var bid=parseFloat(B.value), ask=parseFloat(A.value), n=Math.max(1,parseInt(N.value,10)||1);
+    var v=$("tgVerdict");
+    if(!(bid>0)||!(ask>0)||ask<bid){
+      v.className="verdict"; v.innerHTML="<b>Enter a bid and an ask.</b> The ask is the higher number.";
+      $("tgCost").textContent="—"; $("tgPct").textContent="—";
+      $("tgBE").textContent="—"; $("tgGate").textContent="—";
+      $("tgNote").textContent=""; drawBands(null); return;
+    }
+    var w = ask-bid, mid=(ask+bid)/2;
+    var perContract = w*100, total = perContract*n;
+    var pct = w/mid*100;              /* the toll as a share of what you are paying */
+    var be  = w/mid*100;              /* buy at ask, sell at bid: same number, stated as a move */
+    var band = bandFor(w), vd = VERDICT[band.cls];
+
+    v.className = "verdict "+band.cls;
+    v.innerHTML = '<span class="vt">'+vd.t+'</span><span class="vd">'+vd.d+'</span>';
+
+    $("tgCost").textContent = (total<10? "$"+total.toFixed(2) : "$"+Math.round(total));
+    $("tgCost").className = "v "+(band.cls==="good"?"good":"cost");
+    $("tgPct").textContent = pct.toFixed(1)+"%";
+    $("tgBE").textContent  = be.toFixed(1)+"%";
+    var passes = w<=0.20;
+    $("tgGate").textContent = passes ? "TRADE" : "SKIP";
+    $("tgGate").className = "v "+(passes?"good":"cost");
+
+    drawBands(band);
+
+    var note = "A gap of <b>$"+w.toFixed(2)+"</b> costs <b>$"+perContract.toFixed(2)+
+      "</b> per contract to get in and back out"+(n>1? ", or <b>$"+Math.round(total)+"</b> for "+n+" contracts":"")+
+      ". In our measurements, contracts quoted <b>"+band.label+"</b> wide cost a median of <b>$"+band.med+
+      "</b> and as much as <b>$"+band.worst+"</b> in real money.";
+    if(!passes) note += " This one is <b>outside the $0.20 rule we pre-registered</b> — the same rule that, "+
+      "tested on 48 contracts it had never seen, never let through a trap costing over $50.";
+    else note += " It is <b>inside the $0.20 rule we pre-registered</b>.";
+    $("tgNote").innerHTML = note;
+  }
+
+  [B,A,N].forEach(function(i){ i.addEventListener("input",calc); });
+  calc();
 })();
 
 /* ---------- 2. strike explorer: the 347x range on one underlying ---------- */
