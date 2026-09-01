@@ -107,6 +107,67 @@ class Agent:
             f.write(json.dumps(rec, default=str) + "\n")
         return rec
 
+
+    # -------------------------------------------------------------- management
+
+    def _price_to_close(self, st):
+        """Cost to buy back a credit vertical, priced conservatively: pay the ask on
+        the leg we are short, receive the bid on the leg we are long."""
+        syms = "%s,%s" % (st["short"], st["long"])
+        snaps = aio.req("GET", "%s/v1beta1/options/snapshots" % aio.DATA,
+                        params={"symbols": syms, "feed": "indicative"}).get("snapshots") or {}
+        sq = (snaps.get(st["short"]) or {}).get("latestQuote") or {}
+        lq = (snaps.get(st["long"]) or {}).get("latestQuote") or {}
+        sa, lb = float(sq.get("ap") or 0), float(lq.get("bp") or 0)
+        if sa <= 0:
+            return None
+        return round(sa - lb, 4)
+
+    def manage_positions(self, broker_positions):
+        """Reconcile recorded structures against the broker, then close anything that
+        has reached its profit target.
+
+        State is a cache and drifts -- a structure can be closed by the flatten path,
+        by assignment, or by a human. Anything not backed by a real position is dropped
+        rather than trusted, because acting on a stale record is how an agent sells
+        something it does not own.
+        """
+        held = {p["symbol"] for p in broker_positions}
+        alive, closed = [], 0
+        for st in self.s["open_structures"]:
+            if not self.dry_run and st["short"] not in held:
+                self._journal("structure_gone", short=st["short"],
+                              note="no matching broker position; dropped from state")
+                continue
+            debit = self._price_to_close(st)
+            if debit is None:
+                alive.append(st); continue
+            captured = st["credit"] - debit
+            frac = captured / st["credit"] if st["credit"] else 0
+            if frac >= self.cfg.profit_target_frac:
+                self.s["seq"] += 1
+                spread = VerticalSpread(short_symbol=st["short"], long_symbol=st["long"],
+                                        width=st["width"], underlying=self.cfg.underlying)
+                try:
+                    self.exec.close_vertical(spread, st["contracts"], debit,
+                                             seq=self.s["seq"])
+                    self._journal("closed", short=st["short"], credit=st["credit"],
+                                  debit=debit, captured=round(captured, 4),
+                                  captured_frac=round(frac, 3),
+                                  target=self.cfg.profit_target_frac)
+                    closed += 1
+                    continue
+                except ExecError as e:
+                    self._journal("close_failed", short=st["short"], error=str(e))
+            else:
+                self._journal("holding", short=st["short"], debit=debit,
+                              captured_frac=round(frac, 3),
+                              target=self.cfg.profit_target_frac)
+            alive.append(st)
+        self.s["open_structures"] = alive
+        self._save_state()
+        return closed
+
     # ------------------------------------------------------------------- cycle
 
     def reconcile(self):
@@ -170,6 +231,13 @@ class Agent:
         if not regime.short_premium_ok:
             self._journal("stand_down", reason=regime.explain(), ratio=regime.ratio)
             return "stand_down"
+
+        # manage what is open BEFORE looking for anything new: capital freed by a
+        # close is immediately available, and a full book should not block itself.
+        if self.s["open_structures"]:
+            n = self.manage_positions(positions)
+            if n:
+                st = self.exec.reconcile(); positions = st["positions"]
 
         if len(positions) >= self.cfg.max_concurrent:
             self._journal("at_capacity", n_positions=len(positions))
