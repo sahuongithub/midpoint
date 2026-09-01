@@ -16,6 +16,12 @@ disclosure — effective spread, price improvement, E/Q — for *NMS stocks*, an
 17 CFR 242.600 defines an NMS stock as "any NMS security other than an option."
 Equities got execution-quality disclosure in 2001. Options never did.
 
+## See it
+
+**[The explorable walkthrough →](https://sahuongithub.github.io/midpoint/)** — what a strike actually
+costs, why the numbers are trustworthy, and the working behind them. Seven interactions over real
+measured data; plain English on the surface, the full statistics in the appendix.
+
 ## What this is
 
 A measurement method, four findings, and an agent that acts on them.
@@ -47,6 +53,9 @@ pre-trade risk kernel whose gates map to SEC Rule 15c3-5.
     tools/*_study.py        the experiments behind the findings above
     config/risk.json        frozen risk limits
     PRE-REGISTRATION.md     rules fixed before the first trade
+    site/                   source for the public explorable
+    tools/build_site.py     regenerates docs/index.html from results/
+    app.py                  Streamlit operator view (live data during a session)
 
 ## Running the tests
 
