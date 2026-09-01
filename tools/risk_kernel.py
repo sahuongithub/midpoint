@@ -94,6 +94,8 @@ class Proposal:
     quoted_width: Optional[float] = None
     dte: int = 0
     fingerprint: str = ""
+    snapshot: Optional[dict] = None     # market state at proposal time, so that a
+                                        # refusal can be priced later (opportunity_cost.py)
 
     def notional(self) -> float:
         return abs(self.limit_price) * 100 * self.contracts
@@ -311,10 +313,51 @@ class RiskKernel:
         return d
 
     def _log(self, p, s, d):
+        """Every evaluation is journaled with enough market state to price the
+        counterfactual afterwards.
+
+        Standard transaction-cost analysis can only see orders that were sent.
+        Grinold and Kahn call the rest censored data, and Wayne Wagner's studies
+        found the opportunity cost of trades never made often dominates every cost
+        that is measured. A refusal log that records only the reason cannot answer
+        the one question worth asking of a risk system -- did the refusals help? --
+        so we record the quotes too, and settle the answer at expiry.
+        """
         rec = {"ts": datetime.now(timezone.utc).isoformat(),
                "strategy": p.strategy, "underlying": p.underlying,
                "proposed_contracts": p.contracts, "decision": d.action,
                "contracts": d.contracts, "gate": d.gate, "reasons": d.reasons,
-               "equity": s.equity}
+               "equity": s.equity,
+               "limit_price": p.limit_price,
+               "max_loss_per_contract": p.max_loss_per_contract,
+               "quoted_width": p.quoted_width, "fair_value": p.fair_value,
+               "dte": p.dte, "fingerprint": p.fingerprint,
+               "legs": [asdict(l) if not isinstance(l, dict) else l for l in p.legs],
+               "snapshot": p.snapshot}
+        with open(self.journal_path, "a", buffering=1) as f:
+            f.write(json.dumps(rec) + "\n")
+
+    def log_external_refusal(self, gate: str, reason: str, snapshot: dict,
+                             equity: float = None, strategy: str = "",
+                             underlying: str = "") -> None:
+        """Journal a refusal raised BEFORE a Proposal exists.
+
+        The measured liquidity gate runs inside structure building -- a spread whose
+        legs are too wide is never proposed at all. Those refusals used to leave no
+        trace, which would have quietly biased the refusal ledger toward the gates
+        that happen to sit late in the pipeline. They are recorded here in the same
+        journal, flagged with their stage.
+        """
+        rec = {"ts": datetime.now(timezone.utc).isoformat(),
+               "strategy": strategy or (snapshot or {}).get("kind", "") + "-credit-vertical",
+               "underlying": underlying or (snapshot or {}).get("underlying", ""),
+               "proposed_contracts": (snapshot or {}).get("contracts_proposed", 0),
+               "decision": REJECT, "contracts": 0, "gate": gate,
+               "reasons": [{"gate": gate, "reason": reason, "action": REJECT}],
+               "equity": equity, "stage": "pre-proposal",
+               "limit_price": (snapshot or {}).get("credit_per_share"),
+               "max_loss_per_contract": (snapshot or {}).get("max_loss_per_share"),
+               "dte": (snapshot or {}).get("dte"),
+               "snapshot": snapshot}
         with open(self.journal_path, "a", buffering=1) as f:
             f.write(json.dumps(rec) + "\n")

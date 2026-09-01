@@ -51,12 +51,23 @@ class Candidate:
     ask: float
     delta: Optional[float]
     greeks_source: str
+    bid_size: Optional[int] = None
+    ask_size: Optional[int] = None
+    iv: Optional[float] = None
 
     @property
     def mid(self): return (self.bid + self.ask) / 2
 
     @property
     def width(self): return self.ask - self.bid
+
+    def snap(self) -> dict:
+        """Everything needed to price this leg's counterfactual after the fact."""
+        return {"symbol": self.symbol, "strike": self.strike, "expiry": self.expiry,
+                "kind": self.kind, "bid": self.bid, "ask": self.ask,
+                "bid_size": self.bid_size, "ask_size": self.ask_size,
+                "delta": self.delta, "iv": self.iv,
+                "greeks_source": self.greeks_source}
 
 
 def _et_date():
@@ -114,8 +125,10 @@ def fetch_chain(underlying: str, min_dte: int, max_dte: int, kind: str,
         bid, ask = float(q.get("bp") or 0), float(q.get("ap") or 0)
         if bid <= 0 or ask <= 0:
             continue
+        bsz, asz = q.get("bs"), q.get("as")
         g = sn.get("greeks") or {}
         delta, src = g.get("delta"), "alpaca"
+        iv = sn.get("impliedVolatility")
         if delta is None:                                     # 0DTE: Alpaca gives none
             T = pricing.year_fraction(dte, _hours_left_et())
             iv = pricing.implied_vol((bid + ask) / 2, spot, float(c["strike_price"]),
@@ -127,7 +140,10 @@ def fetch_chain(underlying: str, min_dte: int, max_dte: int, kind: str,
             else:
                 src = "unavailable"
         out.append(Candidate(c["symbol"], float(c["strike_price"]), expiry, dte,
-                             kind, bid, ask, delta, src))
+                             kind, bid, ask, delta, src,
+                             bid_size=int(bsz) if bsz else None,
+                             ask_size=int(asz) if asz else None,
+                             iv=float(iv) if iv else None))
     return out
 
 
@@ -156,22 +172,36 @@ def build_vertical(underlying: str = "SPY", min_dte: int = 0, max_dte: int = 2,
         return {"ok": False, "reason": "no protective strike available beyond the short"}
     long = min(side, key=lambda c: abs(c.strike - want))
 
+    # the structure we are about to judge, recorded before any gate can kill it, so
+    # that a refusal is as auditable as a fill (see tools/opportunity_cost.py)
+    credit = short.bid - long.ask          # sell the short at its BID, buy long at ASK
+    width = abs(short.strike - long.strike)
+    max_loss = max(0.0, width - credit)
+    snapshot = {
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "underlying": underlying, "spot": spot, "kind": kind,
+        "expiry": short.expiry, "dte": short.dte,
+        "short": short.snap(), "long": long.snap(),
+        "credit_per_share": round(credit, 4),
+        "strike_width": width,
+        "max_loss_per_share": round(max_loss, 4),
+        "max_quoted_width_cfg": max_quoted_width,
+        "contracts_proposed": contracts,
+    }
+
     # LIQUIDITY GATE -- measured, enforced before the proposal exists
     for leg, label in ((short, "short"), (long, "long")):
         if leg.width > max_quoted_width:
-            return {"ok": False,
+            return {"ok": False, "gate": "G9-liquidity(pre-proposal)",
+                    "snapshot": snapshot,
                     "reason": "liquidity gate: %s leg %s quoted $%.2f wide "
                               "(~$%.0f/contract), above the $%.2f limit"
                               % (label, leg.symbol, leg.width, leg.width * 100,
                                  max_quoted_width)}
 
-    # conservative credit: sell the short at its BID, buy the long at its ASK
-    credit = short.bid - long.ask
-    width = abs(short.strike - long.strike)
-    max_loss = max(0.0, width - credit)
     if credit <= 0:
-        return {"ok": False, "reason": "structure is a net debit (%.2f); no credit to sell"
-                % credit}
+        return {"ok": False, "gate": "structure-no-credit", "snapshot": snapshot,
+                "reason": "structure is a net debit (%.2f); no credit to sell" % credit}
 
     proposal = Proposal(
         strategy="%s-credit-vertical" % kind,
@@ -184,6 +214,7 @@ def build_vertical(underlying: str = "SPY", min_dte: int = 0, max_dte: int = 2,
         quoted_width=round(max(short.width, long.width), 4),
         dte=short.dte,
         fingerprint="%s|%s|%s" % (short.symbol, long.symbol, short.expiry),
+        snapshot=snapshot,
     )
     return {"ok": True, "reason": "built", "proposal": proposal,
             "spot": spot, "expiry": short.expiry, "dte": short.dte,

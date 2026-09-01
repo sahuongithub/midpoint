@@ -123,6 +123,55 @@ class Agent:
             return None
         return round(sa - lb, 4)
 
+    def assignment_risk(self, st):
+        """Flag a short leg whose extrinsic value has gone.
+
+        Exchange-traded stock and ETF options are American: the holder of the long
+        side may exercise at any time. Hull (ch. 10) shows why that is rarely
+        rational while extrinsic value remains -- exercising throws that value away
+        -- and why it becomes rational for a put once the option is deep enough in
+        the money that the interest on the strike outweighs what is left. The
+        practical trigger desks watch is the same quantity: extrinsic value near
+        zero on an in-the-money short.
+
+        This does not change what the agent does. The structure is defined-risk, the
+        long leg still caps the loss, and assignment on a spread converts it into
+        stock plus a hedge rather than an open-ended position. It is journalled
+        because an agent that cannot see a risk cannot honestly claim to manage it,
+        and because Alpaca's paper engine is a simulation: whether it models early
+        assignment at all is a property of the venue, not of the market, and we
+        would rather record the exposure than assume it away.
+        """
+        k = float(st.get("short_strike") or 0)
+        if not k:
+            return None                     # pre-upgrade record: nothing to measure
+        try:
+            snaps = aio.req("GET", "%s/v1beta1/options/snapshots" % aio.DATA,
+                            params={"symbols": st["short"],
+                                    "feed": "indicative"}).get("snapshots") or {}
+            q = (snaps.get(st["short"]) or {}).get("latestQuote") or {}
+            bid, ask = float(q.get("bp") or 0), float(q.get("ap") or 0)
+            if bid <= 0 or ask <= 0:
+                return None
+            spot = float(aio.req("GET", "%s/v2/stocks/%s/trades/latest"
+                                 % (aio.DATA, self.cfg.underlying),
+                                 params={"feed": "iex"})["trade"]["p"])
+            kind = st.get("kind", self.cfg.kind)
+            intrinsic = max(0.0, k - spot) if kind == "put" else max(0.0, spot - k)
+            mark = (bid + ask) / 2.0
+            extrinsic = mark - intrinsic
+            itm = intrinsic > 0
+            if itm and extrinsic <= 0.05:
+                return {"short": st["short"], "spot": round(spot, 2), "strike": k,
+                        "intrinsic": round(intrinsic, 3),
+                        "extrinsic": round(extrinsic, 3),
+                        "note": ("short leg is in the money with %.3f extrinsic left; "
+                                 "early assignment becomes rational for the holder "
+                                 "around here" % extrinsic)}
+        except Exception:
+            return None
+        return None
+
     def manage_positions(self, broker_positions):
         """Reconcile recorded structures against the broker, then close anything that
         has reached its profit target.
@@ -140,6 +189,9 @@ class Agent:
                               note="no matching broker position; dropped from state")
                 continue
             debit = self._price_to_close(st)
+            risk = self.assignment_risk(st)
+            if risk:
+                self._journal("assignment_risk", **risk)
             if debit is None:
                 alive.append(st); continue
             captured = st["credit"] - debit
@@ -255,7 +307,16 @@ class Agent:
                                max_quoted_width=self.kernel.cfg.max_quoted_width,
                                contracts=self.cfg.contracts)
         if not built["ok"]:
-            self._journal("no_structure", reason=built["reason"])
+            # a structure-stage refusal is still a refusal: journal it into the same
+            # ledger the kernel writes, with the quotes attached, so that
+            # opportunity_cost.py can price it alongside every other veto
+            if built.get("snapshot"):
+                self.kernel.log_external_refusal(
+                    gate=built.get("gate", "structure"), reason=built["reason"],
+                    snapshot=built["snapshot"], equity=equity,
+                    underlying=self.cfg.underlying)
+            self._journal("no_structure", reason=built["reason"],
+                          gate=built.get("gate"))
             return "no_structure"
 
         p = built["proposal"]
@@ -300,6 +361,9 @@ class Agent:
                 {"short": spread.short_symbol, "long": spread.long_symbol,
                  "width": spread.width, "credit": built["credit"],
                  "contracts": d.contracts, "max_loss": ml * d.contracts,
+                 "short_strike": built["short"].strike,
+                 "long_strike": built["long"].strike,
+                 "kind": self.cfg.kind, "expiry": built["expiry"],
                  "coid": r["client_order_id"], "opened_et": now.isoformat()})
         self._save_state()
         self._journal("opened", coid=r["client_order_id"], contracts=d.contracts,
