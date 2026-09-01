@@ -378,11 +378,24 @@ class Agent:
                       credit=built["credit"], required_win_rate=round(required_win, 4))
         return "opened"
 
-    def run(self, cycles: int = None):
-        self._journal("start", dry_run=self.dry_run, config=asdict(self.cfg))
+    def run(self, cycles: int = None, until_et: str = None):
+        """Run until a cycle count or a wall-clock ET time, whichever comes first.
+
+        An unattended session needs an end condition it cannot miss. The flatten
+        gate closes the book at 15:15, but the process itself should stop rather
+        than idle overnight against a shut exchange.
+        """
+        self._journal("start", dry_run=self.dry_run, config=asdict(self.cfg),
+                      until_et=until_et)
         n = 0
         try:
             while cycles is None or n < cycles:
+                if until_et:
+                    now = _et_now()
+                    if now.hour * 60 + now.minute >= _mins(until_et):
+                        self._journal("session_end", reason="reached %s ET" % until_et)
+                        print("  reached %s ET, stopping" % until_et)
+                        break
                 try:
                     out = self.run_cycle()
                     print("  [%s] cycle %d -> %s" % (_et_now().strftime("%H:%M:%S"), n + 1, out))
@@ -404,6 +417,8 @@ def main():
     ap.add_argument("--cycles", type=int, default=1)
     ap.add_argument("--cycle-seconds", type=float, default=60.0)
     ap.add_argument("--contracts", type=int, default=1)
+    ap.add_argument("--until-et", default=None,
+                    help="stop at this ET time, e.g. 16:05")
     a = ap.parse_args()
 
     risk = RiskConfig(**json.load(open(os.path.expanduser("~/midpoint/config/risk.json"))))
@@ -411,7 +426,7 @@ def main():
     agent = Agent(cfg, risk, dry_run=not a.live)
     print("Midpoint agent | %s | %s" % ("LIVE" if a.live else "DRY RUN",
                                         _et_now().strftime("%Y-%m-%d %H:%M ET")))
-    agent.run(cycles=a.cycles)
+    agent.run(cycles=None if a.until_et else a.cycles, until_et=a.until_et)
 
 
 if __name__ == "__main__":
