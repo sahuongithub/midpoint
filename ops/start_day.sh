@@ -1,8 +1,9 @@
 #!/bin/zsh
 # Start everything for one trading day, in one command.
 #
-#   ./ops/start_day.sh                  research account, for experiments
-#   ./ops/start_day.sh --competition    the account the contest is judged on
+#   ./ops/start_day.sh                  BOTH accounts: judged first, then research
+#   ./ops/start_day.sh --competition    only the account the contest is judged on
+#   ./ops/start_day.sh --research       only the research account
 #
 # Two accounts, deliberately kept apart. Research probes buy and sell purely to
 # measure the venue, and a judged account carrying that traffic would have an
@@ -24,14 +25,32 @@ echo "======================================================================"
 echo "  MIDPOINT -- starting the day    $ET_DATE  $ET_TIME ET"
 echo "======================================================================"
 
-MODE="research"
-ENVFILE="$HOME/.config/midpoint/lab.env"
+MODE=""
 for a in "$@"; do
-  if [ "$a" = "--competition" ]; then
-    MODE="competition"
-    ENVFILE="$HOME/.config/midpoint/competition.env"
-  fi
+  [ "$a" = "--competition" ] && MODE="competition"
+  [ "$a" = "--research" ] && MODE="research"
 done
+
+# With no account named, do both -- judged first, so that if anything goes wrong
+# it goes wrong on the run that matters least. Each is a separate invocation with
+# its own guards, so one failing cannot stop the other.
+if [ -z "$MODE" ]; then
+  RC=0
+  echo "  starting both accounts"
+  echo ""
+  echo "  --- judged account ---"
+  "$0" --competition || RC=1
+  echo ""
+  echo "  --- research account ---"
+  "$0" --research || RC=1
+  exit $RC
+fi
+
+if [ "$MODE" = "competition" ]; then
+  ENVFILE="$HOME/.config/midpoint/competition.env"
+else
+  ENVFILE="$HOME/.config/midpoint/lab.env"
+fi
 
 if [ ! -f "$ENVFILE" ]; then
   echo "  ! no credentials at $ENVFILE"
