@@ -601,6 +601,58 @@
     </div>
 
     <div class="card">
+      <h3>We audited the venue every paper result depends on</h3>
+      <p class="small" style="margin-top:10px">Every submission in this contest reports a paper profit and
+      loss, and each of those numbers inherits whatever the paper venue assumes about liquidity. Nobody
+      appears to have measured what that assumption is, so we did.</p>
+      <p class="small" style="margin-top:10px">Theory is specific about what a real market does. Impact grows
+      as the square root of size traded &mdash; Grinold and Kahn derive it from the liquidity supplier's
+      inventory risk, Loeb's 1983 block-bid data fits the curve, and BARRA's own fitting put the exponent at
+      one half. Displayed depth at the touch is small, so a large marketable order walks the book by
+      construction. We sent one contract, then 49, then 196 &mdash; the last of those <b>1.34&times; the entire
+      displayed offer</b> &mdash; and recorded what came back.</p>
+      <div class="tw" style="margin-top:16px"><table>
+        <thead><tr><th>Size</th><th>Displayed at the offer</th><th>Multiple</th><th>Quoted ask</th><th>Filled at</th><th>Round trip</th></tr></thead>
+        <tbody>
+          <tr><td class="n">1</td><td class="n">67</td><td class="n">0.01&times;</td><td class="n">$1.24</td><td class="n">$1.21</td><td class="n">$0.00</td></tr>
+          <tr><td class="n">49</td><td class="n">178</td><td class="n">0.28&times;</td><td class="n">$1.19</td><td class="n">$1.26</td><td class="n">+$0.02</td></tr>
+          <tr><td class="n">196</td><td class="n">146</td><td class="n"><b>1.34&times;</b></td><td class="n">$1.30</td><td class="n"><b>$1.27</b></td><td class="n">+$0.01</td></tr>
+        </tbody></table></div>
+      <p class="small" style="margin-top:12px">Two things here survive any objection. <b>The round trip is a
+      matched pair</b> &mdash; buy and sell the same contract seconds apart &mdash; so market drift cancels out
+      of it. In a real book a round trip costs at least the quoted spread, because you buy at the offer and
+      sell at the bid; that is as close to a law as microstructure has. Here not one round trip cost anything,
+      and two of them paid us. <b>And the largest order took 1.34 times the entire visible offer and filled
+      three cents inside it</b>, where a real book would have exhausted the offer and walked up to worse
+      prices.</p>
+      <p class="small" style="margin-top:10px"><b>The square-root law does not operate in this venue.</b> Order
+      size is free here in a way it never is in a market. That is not a complaint about Alpaca &mdash; a paper
+      engine is a teaching tool, not a market simulator &mdash; but it does mean every paper profit in this
+      contest, ours included, was earned somewhere that gives away liquidity a real market sells.</p>
+      <p class="small" style="margin-top:10px"><b>What it does not establish:</b> a size-impact curve. Three
+      rungs, and on 0DTE contracts the quote moved several cents between our snapshot and the fill, so the
+      per-rung slippage figures mix size with ordinary market movement. We do not read them as impact. The
+      round trip and the depth multiple are the two measurements that survive that confound, and they are the
+      only two we draw a conclusion from.</p>
+      <p class="tiny" style="margin-top:12px">Raw rungs in <span class="mono">results/size_ladder.jsonl</span>,
+      analysis in <span class="mono">tools/size_ladder_analyze.py</span>. The probe cost nothing and its
+      profit is excluded from every trading figure we report &mdash; see the note on attribution below.</p>
+    </div>
+
+    <div class="card plain">
+      <h3>Why our own profit figure is smaller than the account says</h3>
+      <p class="small" style="margin-top:10px">One paper account has carried two different activities: the
+      agent trading its strategy, and research probes that deliberately buy and sell to measure how the venue
+      behaves. The broker adds them together. We do not.</p>
+      <p class="small" style="margin-top:10px">A probe that happens to end up ahead is not a trading result by
+      any reading, and blending it into one number is the exact thing our reporting rules forbid. Every fill is
+      attributed to the thing that caused it, using the agent's own journal as the record of what it traded;
+      anything else on the account is research and is reported separately, whichever way it lands.</p>
+      <p class="tiny" style="margin-top:10px">Run it yourself:
+      <span class="mono">python3 tools/pnl_attribution.py</span>.</p>
+    </div>
+
+    <div class="card">
       <h3>What we did not build, and why</h3>
       <p class="small" style="margin-top:10px">There is a mature literature of optimal execution, and we used
       almost none of it. That is a choice, not an oversight, and the reasons are specific.</p>

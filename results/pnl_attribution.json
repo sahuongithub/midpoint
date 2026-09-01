@@ -1,0 +1,18 @@
+{
+ "date": "2026-09-01",
+ "account": "PA3TD7HMABNH",
+ "equity": 96690.08,
+ "broker_day_pnl": 290.35,
+ "agent": {
+  "fills": 12,
+  "net_cash": 24.0
+ },
+ "research": {
+  "fills": 6,
+  "net_cash": 294.0,
+  "contracts": [
+   "SPY260901C00763000"
+  ]
+ },
+ "note": "agent contracts are those the agent journalled; everything else on the account is a research probe and is reported separately"
+}

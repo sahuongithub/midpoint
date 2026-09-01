@@ -1,0 +1,154 @@
+{
+ "contract": "SPY260901C00763000",
+ "rungs": 3,
+ "round_trips_per_share": [
+  0.0,
+  0.020000000000000018,
+  0.010000000000000009
+ ],
+ "all_round_trips_free": true,
+ "max_multiple_of_displayed": 1.3424657534246576,
+ "filled_inside_offer_at_max_size": true,
+ "verdict": "the venue fills any size at the touch and charges nothing for a round trip; the square-root impact law does not operate here",
+ "caveat": "three rungs; per-rung slippage is confounded by quote drift on 0DTE contracts and is not interpreted as impact",
+ "rows": [
+  {
+   "ts": "2026-09-01T15:00:15.864517+00:00",
+   "et": "11:00:15",
+   "contract": "SPY260901C00763000",
+   "strike": 763.0,
+   "expiry": "2026-09-01",
+   "requested": 1,
+   "pre_quote": {
+    "bid": 1.23,
+    "ask": 1.24,
+    "bid_size": 130,
+    "ask_size": 67,
+    "ts": "2026-09-01T15:00:08.595261678Z"
+   },
+   "mid_quote": {
+    "bid": 1.2,
+    "ask": 1.21,
+    "bid_size": 143,
+    "ask_size": 617,
+    "ts": "2026-09-01T15:00:12.048667734Z"
+   },
+   "post_quote": {
+    "bid": 1.16,
+    "ask": 1.21,
+    "bid_size": 218,
+    "ask_size": 125,
+    "ts": "2026-09-01T15:00:14.971538399Z"
+   },
+   "buy": {
+    "status": "filled",
+    "filled_qty": 1,
+    "fill": 1.21,
+    "latency_s": 1.03,
+    "slip_vs_ask": -0.03
+   },
+   "sell": {
+    "status": "filled",
+    "filled_qty": 1,
+    "fill": 1.21,
+    "latency_s": 1.21,
+    "slip_vs_bid": -0.01
+   },
+   "round_trip_usd": 0.0,
+   "displayed_ask_size": 67,
+   "size_vs_displayed": 0.014925373134328358
+  },
+  {
+   "ts": "2026-09-01T15:00:24.504256+00:00",
+   "et": "11:00:24",
+   "contract": "SPY260901C00763000",
+   "strike": 763.0,
+   "expiry": "2026-09-01",
+   "requested": 49,
+   "pre_quote": {
+    "bid": 1.18,
+    "ask": 1.19,
+    "bid_size": 183,
+    "ask_size": 178,
+    "ts": "2026-09-01T15:00:17.328615269Z"
+   },
+   "mid_quote": {
+    "bid": 1.27,
+    "ask": 1.28,
+    "bid_size": 165,
+    "ask_size": 106,
+    "ts": "2026-09-01T15:00:20.125686502Z"
+   },
+   "post_quote": {
+    "bid": 1.25,
+    "ask": 1.3,
+    "bid_size": 159,
+    "ask_size": 49,
+    "ts": "2026-09-01T15:00:23.352621257Z"
+   },
+   "buy": {
+    "status": "filled",
+    "filled_qty": 49,
+    "fill": 1.26,
+    "latency_s": 1.02,
+    "slip_vs_ask": 0.07
+   },
+   "sell": {
+    "status": "filled",
+    "filled_qty": 49,
+    "fill": 1.28,
+    "latency_s": 1.0,
+    "slip_vs_bid": -0.01
+   },
+   "round_trip_usd": -98.0,
+   "displayed_ask_size": 178,
+   "size_vs_displayed": 0.2752808988764045
+  },
+  {
+   "ts": "2026-09-01T15:00:34.243289+00:00",
+   "et": "11:00:34",
+   "contract": "SPY260901C00763000",
+   "strike": 763.0,
+   "expiry": "2026-09-01",
+   "requested": 196,
+   "pre_quote": {
+    "bid": 1.29,
+    "ask": 1.3,
+    "bid_size": 149,
+    "ask_size": 146,
+    "ts": "2026-09-01T15:00:25.395648667Z"
+   },
+   "mid_quote": {
+    "bid": 1.26,
+    "ask": 1.27,
+    "bid_size": 66,
+    "ask_size": 99,
+    "ts": "2026-09-01T15:00:29.249585566Z"
+   },
+   "post_quote": {
+    "bid": 1.31,
+    "ask": 1.32,
+    "bid_size": 189,
+    "ask_size": 194,
+    "ts": "2026-09-01T15:00:33.111555659Z"
+   },
+   "buy": {
+    "status": "filled",
+    "filled_qty": 196,
+    "fill": 1.27,
+    "latency_s": 1.38,
+    "slip_vs_ask": -0.03
+   },
+   "sell": {
+    "status": "filled",
+    "filled_qty": 196,
+    "fill": 1.28,
+    "latency_s": 1.06,
+    "slip_vs_bid": -0.02
+   },
+   "round_trip_usd": -196.0,
+   "displayed_ask_size": 146,
+   "size_vs_displayed": 1.3424657534246576
+  }
+ ]
+}

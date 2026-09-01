@@ -19,6 +19,12 @@ fi
 say "settling refusals against today's closes"
 /usr/bin/python3 tools/opportunity_cost.py >> "$LOG/post_session.log" 2>&1
 
+say "attributing profit and loss by cause"
+/usr/bin/python3 tools/pnl_attribution.py >> "$LOG/post_session.log" 2>&1
+
+say "analysing the size ladder"
+/usr/bin/python3 tools/size_ladder_analyze.py >> "$LOG/post_session.log" 2>&1
+
 say "analysing the intraday spread curve"
 /usr/bin/python3 tools/spread_curve_analyze.py >> "$LOG/post_session.log" 2>&1
 

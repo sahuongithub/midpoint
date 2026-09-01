@@ -55,9 +55,20 @@ def build_data():
                 "saved": oc.get("saved_usd"), "cost": oc.get("cost_usd"),
                 "by_gate": oc.get("by_gate", {})} if oc else {}
     sc = load("spread_curve_summary.json") or {}
+    sl = load("size_ladder_summary.json") or {}
+    ladder = {"rungs": sl.get("rungs"),
+              "round_trips": sl.get("round_trips_per_share"),
+              "all_free": sl.get("all_round_trips_free"),
+              "max_multiple": sl.get("max_multiple_of_displayed"),
+              "verdict": sl.get("verdict")} if sl else {}
+    at = load("pnl_attribution.json") or {}
+    attrib = {"agent": (at.get("agent") or {}).get("net_cash"),
+              "research": (at.get("research") or {}).get("net_cash"),
+              "broker": at.get("broker_day_pnl")} if at else {}
     return {"contracts": contracts, "oracle": oracle, "paired": paired,
             "summary": pa.get("summary", {}),
-            "micro": micro, "refusals": refusals, "spread_curve": sc}
+            "micro": micro, "refusals": refusals, "spread_curve": sc,
+            "ladder": ladder, "attribution": attrib}
 
 
 def main():
@@ -90,6 +101,12 @@ def main():
               % (r["refusals"], r.get("settled") or 0, r.get("net")))
     if data.get("spread_curve", {}).get("samples"):
         print("  spread curve: %d samples" % data["spread_curve"]["samples"])
+    if data.get("ladder", {}).get("rungs"):
+        print("  size ladder: %d rungs, max %.2fx displayed depth"
+              % (data["ladder"]["rungs"], data["ladder"]["max_multiple"] or 0))
+    a = data.get("attribution") or {}
+    if a.get("agent") is not None:
+        print("  attribution: agent $%+.2f, research $%+.2f" % (a["agent"], a["research"]))
     costs = [c["cost"] for c in data["contracts"]]
     print("  cost range $%.0f to $%.0f" % (min(costs), max(costs)))
     if kb > 900:
