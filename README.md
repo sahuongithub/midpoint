@@ -18,6 +18,9 @@ Equities got execution-quality disclosure in 2001. Options never did.
 
 ## See it
 
+**[A guided tour for reviewers →](REVIEWERS.md)** — the five things worth looking at,
+with the exact command to reproduce each one.
+
 **[The explorable walkthrough →](https://sahuongithub.github.io/midpoint/)** — what a strike actually
 costs, why the numbers are trustworthy, and the working behind them. Seven interactions over real
 measured data; plain English on the surface, the full statistics in the appendix.
