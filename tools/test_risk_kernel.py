@@ -99,7 +99,8 @@ n = sum(1 for _ in open(J))
 check("every decision is journalled", n >= 20, "%d records" % n)
 
 print("\n" + "="*64)
-print("  %d passed, %d failed" % (len(PASSED), len(FAILED)))
 if FAILED:
+    print("  %d passed, %d FAILED" % (len(PASSED), len(FAILED)))
     print("  FAILING:", FAILED); sys.exit(1)
 print("="*64)
+print("  %d passed, 0 failed" % len(PASSED))
