@@ -4,8 +4,10 @@
 config/*.local.json
 **/secrets*
 # large recorded data
-docs/*.jsonl
-docs/fv_study.json
+# working data stays local; only the built site is published
+docs/*
+!docs/index.html
+!docs/.nojekyll
 __pycache__/
 *.pyc
 .DS_Store

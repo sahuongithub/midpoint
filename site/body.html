@@ -1,0 +1,379 @@
+<header class="hero">
+  <div class="eyebrow">Midpoint · measured on live markets</div>
+  <h1>The bill nobody<br>shows you.</h1>
+  <p class="hero-sub">Buying one options contract cost <span class="mono" style="color:var(--clay);font-weight:600">$347</span>
+  in hidden fees. The <em>same trade</em>, one strike away, cost <b>$7</b>.</p>
+  <p class="lede" style="margin-top:20px;max-width:34em">Nobody had to tell that trader. Stock trades come with a
+  legally required receipt for this. Options don't — and options are where the money goes.</p>
+  <div class="badges">
+    <span class="badge">65 contracts measured</span>
+    <span class="badge">live markets, 31 Aug 2026</span>
+    <span class="badge">every number recomputable</span>
+    <span class="badge">rules pre-registered</span>
+  </div>
+</header>
+
+<section>
+  <div class="eyebrow">01 — the thing nobody explains</div>
+  <h2>Every trade has two prices</h2>
+  <p class="lede" style="margin-top:14px;max-width:36em">There's a price to buy and a lower price to sell,
+  at the same moment. The gap between them is the house's cut. You pay it going in, and again coming out.</p>
+  <div class="demo" style="margin-top:22px">
+    <div class="demo-head"><span class="tag">drag me</span><span class="t">Where does your order land?</span></div>
+    <div class="demo-body">
+      <div class="spread" id="sp">
+        <div class="track"></div><div class="zone" id="spzone"></div>
+        <div class="pin" style="left:12%"></div><div class="plabel" id="lblBid" style="left:12%">$2.21</div>
+        <div class="psub" style="left:12%">sell here</div>
+        <div class="pin mid" style="left:50%"></div><div class="plabel" style="left:50%;color:var(--indigo)">$2.28</div>
+        <div class="psub" style="left:50%">true worth</div>
+        <div class="pin" style="left:88%"></div><div class="plabel" id="lblAsk" style="left:88%">$2.35</div>
+        <div class="psub" style="left:88%">buy here</div>
+        <div class="handle" id="sphandle" style="left:88%" role="slider" tabindex="0"
+             aria-label="Order price" aria-valuemin="2.21" aria-valuemax="2.35" aria-valuenow="2.35"></div>
+      </div>
+      <div class="readout">
+        <div><div class="k">You pay</div><div class="v" id="spPay">$2.35</div></div>
+        <div><div class="k">It's worth</div><div class="v neu">$2.28</div></div>
+        <div><div class="k">Lost per contract</div><div class="v cost" id="spLoss">$7</div></div>
+        <div><div class="k">Round trip</div><div class="v cost" id="spRound">$14</div></div>
+      </div>
+      <div class="notice">One contract is 100 shares, so a <b>7-cent</b> gap is <b>$7</b> of real money —
+      and you pay it twice, once to open and once to close.</div>
+    </div>
+  </div>
+  <details><summary>Show me the working</summary><div class="inner">
+    Quotes shown are a real SPY contract. The "true worth" is the midpoint between the two prices, which is the
+    standard benchmark professionals measure execution against. Options are quoted per share and sold in
+    hundreds, which is why small-looking numbers become large ones.
+  </div></details>
+</section>
+
+<section>
+  <div class="eyebrow">02 — the centrepiece</div>
+  <h2>Pick a strike. See the bill.</h2>
+  <p class="lede" style="margin-top:14px;max-width:36em">Every bar below is a real contract we bought and sold
+  on the same afternoon, on the same underlying, to find out what it truly cost. Sorted cheapest to dearest.</p>
+  <div class="demo" style="margin-top:22px">
+    <div class="demo-head"><span class="tag">explore</span><span class="t">65 contracts, one afternoon</span></div>
+    <div class="demo-body">
+      <div class="ctlgrid">
+        <div><label class="ctl" for="fU">Underlying</label><select id="fU"></select></div>
+        <div><label class="ctl" for="fE">Expiry</label><select id="fE"></select></div>
+        <div><label class="ctl" for="fM">Strike vs price</label><select id="fM"></select></div>
+      </div>
+      <div class="bars" id="bars" style="margin-top:22px"></div>
+      <div class="axis"><span>cheapest</span><span id="axN">—</span><span>most expensive</span></div>
+      <div class="readout">
+        <div><div class="k">Contracts shown</div><div class="v neu" id="exN">—</div></div>
+        <div><div class="k">Typical cost</div><div class="v" id="exMed">—</div></div>
+        <div><div class="k">Worst</div><div class="v cost" id="exMax">—</div></div>
+        <div><div class="k">Cheapest</div><div class="v good" id="exMin">—</div></div>
+      </div>
+      <div class="notice" id="exNote">Click any bar to see which contract it is.</div>
+    </div>
+  </div>
+  <details><summary>Show me the working</summary><div class="inner">
+    For each contract we bought one and immediately sold one, recovering the real buy price and the real sell
+    price. Net position zero; the cost is the gap we crossed. Two sweeps on 31 Aug 2026, 65 contracts with
+    ground truth, run on a separate experimental account that is never submitted for judging.
+  </div></details>
+</section>
+
+<section>
+  <div class="eyebrow">03 — the trap</div>
+  <h2>Same bet. 116× the cost.</h2>
+  <p class="lede" style="margin-top:14px;max-width:36em">A deep in-the-money call moves almost exactly like
+  100 shares. Traders use them as a substitute. Here is what the substitution costs.</p>
+  <div class="demo" style="margin-top:22px">
+    <div class="demo-head"><span class="tag">compare</span><span class="t">Two ways to own the same exposure</span></div>
+    <div class="demo-body">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="seg" id="wShares" aria-pressed="true">Buy 100 shares</button>
+        <button class="seg" id="wOption" aria-pressed="false">Buy the deep-ITM call</button>
+      </div>
+      <div class="readout">
+        <div><div class="k">What you own</div><div class="v neu" id="twWhat" style="font-size:1.05rem">100 SPY shares</div></div>
+        <div><div class="k">Hidden fee</div><div class="v" id="twCost">$3</div></div>
+        <div><div class="k">Compared</div><div class="v" id="twRatio">baseline</div></div>
+      </div>
+      <div class="notice" id="twNote">SPY's own spread that afternoon was three cents. A hundred shares cost <b>$3</b> to get in and out of.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">04 — the number nobody computes</div>
+  <h2>How often does this have to work?</h2>
+  <p class="lede" style="margin-top:14px;max-width:36em">Selling an option pays you cash up front. It feels like
+  free money. It isn't — the cash is priced against how likely you are to lose. Here's the honest arithmetic.</p>
+  <div class="demo" style="margin-top:22px">
+    <div class="demo-head"><span class="tag">calculate</span><span class="t">Required win rate</span></div>
+    <div class="demo-body">
+      <div class="ctlgrid">
+        <div><label class="ctl" for="wW">Spread width ($)</label><input type="number" id="wW" value="1" min="0.5" max="20" step="0.5"></div>
+        <div><label class="ctl" for="wC">Cash received ($)</label><input type="number" id="wC" value="0.13" min="0.01" max="10" step="0.01"></div>
+      </div>
+      <div class="readout">
+        <div><div class="k">You can win</div><div class="v good" id="wWin">$13</div></div>
+        <div><div class="k">You can lose</div><div class="v cost" id="wLose">$87</div></div>
+        <div><div class="k">Must win at least</div><div class="v cost" id="wNeed">87.0%</div></div>
+      </div>
+      <div class="gauge"><div class="need" id="wBar" style="width:87%"></div></div>
+      <div class="axis"><span>0%</span><span>break even</span><span>100%</span></div>
+      <div class="notice">This is a <b>risk-shape disclosure, not a prediction</b>. It tells you what the trade
+      needs — not whether it will happen. Our own agent records this number for every trade it takes.</div>
+    </div>
+  </div>
+  <details><summary>Show me the working</summary><div class="inner">
+    Maximum loss is the width of the spread minus the cash received. Break-even win rate is
+    <code>maxLoss / (maxLoss + credit)</code>. Widening the spread does not improve it — we checked at
+    1, 2, 3 and 4 dollars wide and all sit within half a point of each other. That is the market pricing
+    correctly, not a flaw in the trade.
+  </div></details>
+</section>
+
+<section>
+  <div class="eyebrow">05 — why trust any of this</div>
+  <h2>We found a way to see the real price</h2>
+  <p class="lede" style="margin-top:14px;max-width:36em">The free data feed is an approximation. So instead of
+  trusting it, we sent six orders at the same instant, each offering a wildly different price, and watched what
+  we were actually charged.</p>
+  <div class="demo" style="margin-top:22px">
+    <div class="demo-head"><span class="tag">step through</span><span class="t">Six orders, one instant</span></div>
+    <div class="demo-body">
+      <div class="tw"><table><thead><tr><th>We offered up to</th><th>We actually paid</th><th>Difference</th></tr></thead>
+      <tbody id="orTb"></tbody></table></div>
+      <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="act" id="orNext">Send the next order</button>
+        <span class="tiny" id="orHint">One at a time — watch the right-hand column.</span>
+      </div>
+      <div class="notice" id="orNote" style="display:none"><b>The offer changed by a dollar. The price changed
+      by a penny.</b> The market charges what it charges, whatever you're willing to pay — which means every fill
+      is an exact reading of the real price, and we can measure the truth for free.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">06 — we tested our own idea and it failed</div>
+  <h2>Does waiting for a better moment help?</h2>
+  <p class="lede" style="margin-top:14px;max-width:36em">The received wisdom is that patient traders get better
+  prices. We ran it properly: ten pairs of identical trades, differing only in <em>when</em> the order went in.
+  Each square is one pair.</p>
+  <div class="demo" style="margin-top:22px">
+    <div class="demo-head"><span class="tag">count them</span><span class="t">10 paired trials</span></div>
+    <div class="demo-body">
+      <div class="dots" id="pdots"></div>
+      <div class="readout">
+        <div><div class="k">Waiting was cheaper</div><div class="v good" id="pWin">—</div></div>
+        <div><div class="k">Waiting was dearer</div><div class="v cost" id="pLose">—</div></div>
+        <div><div class="k">Average difference</div><div class="v" id="pDiff">—</div></div>
+      </div>
+      <div class="notice">Near enough a coin flip. <b>We looked for the effect and it isn't there</b> — at least
+      not at a size worth chasing. Choosing the right contract, by contrast, was worth about
+      <b>eighty times more</b>. That's why this page opens with strike choice and not with timing.</div>
+    </div>
+  </div>
+  <details><summary>Show me the working</summary><div class="inner">
+    Same contract, traded twice moments apart, differing only in when the order was sent. Each arm is charged
+    against fair value at its own fill instant, so a market that merely drifted cannot be mistaken for good
+    execution. Difference <span class="mono">+$0.15</span> per contract, <span class="mono">t = +0.31</span>,
+    95% confidence interval <span class="mono">[−$0.82, +$1.12]</span> — which excludes the published effect
+    this was testing for. That effect would have needed only four pairs to detect; we ran ten.
+  </div></details>
+</section>
+
+<section>
+  <div class="eyebrow">07 — one rule, measured</div>
+  <h2>The screen that would have caught it</h2>
+  <p class="lede" style="margin-top:14px;max-width:36em">You can't see the real price before you trade. But the
+  free feed's quoted gap, unreliable as its exact value is, ranks contracts almost perfectly. Drag the line and
+  watch the expensive ones fall away.</p>
+  <div class="demo" style="margin-top:22px">
+    <div class="demo-head"><span class="tag">drag the rule</span><span class="t">Reject anything quoted wider than…</span></div>
+    <div class="demo-body">
+      <label class="ctl" for="gThr">Threshold — <span class="mono" id="gVal">$0.20</span></label>
+      <input type="range" id="gThr" min="5" max="100" value="20" step="5">
+      <div class="bars" id="gBars" style="margin-top:20px"></div>
+      <div class="axis"><span>kept</span><span>rejected</span></div>
+      <div class="readout">
+        <div><div class="k">Kept</div><div class="v good" id="gPass">—</div></div>
+        <div><div class="k">Average cost kept</div><div class="v good" id="gPassC">—</div></div>
+        <div><div class="k">Rejected</div><div class="v cost" id="gRej">—</div></div>
+        <div><div class="k">Average cost rejected</div><div class="v cost" id="gRejC">—</div></div>
+      </div>
+      <div class="notice" id="gNote"></div>
+    </div>
+  </div>
+  <details><summary>Show me the working</summary><div class="inner">
+    The threshold is in dollars, not percent, deliberately: a one-cent gap on a three-cent option is 33% in
+    relative terms but only a dollar in real money, and a percentage rule throws away perfectly cheap contracts.
+    The $0.20 line was derived on the first 17 contracts and then tested, unchanged, on 48 more measured an hour
+    later. It let through nothing costing over $50 in either sample.
+  </div></details>
+</section>
+
+<section class="appendix">
+  <div class="eyebrow">the machinery</div>
+  <h2>For readers who want the actual numbers</h2>
+  <p class="lede" style="margin-top:14px;max-width:38em">Everything above is deliberately plain. Everything below
+  is not. This is the working: the models, the statistics, the regulatory basis, and the one finding we published
+  and then had to withdraw.</p>
+
+  <div class="stack" style="margin-top:30px">
+    <div class="card">
+      <h3>Fair value is predictable from the underlying — and we measured how fast</h3>
+      <p class="small" style="margin-top:10px">Muravyev &amp; Pearson (RFS 2020) argue option fair value is
+      predictable at high frequency from the underlying. We tested it on 240 read-only samples across eight
+      contracts, regressing each option's realised 40-second price change on the delta-gamma prediction
+      <span class="mono">δ·dS + ½γ·dS²</span>.</p>
+      <div class="tw" style="margin-top:16px"><table>
+        <thead><tr><th>Contract</th><th>Slope</th><th>t-stat</th><th>R²</th></tr></thead><tbody>
+        <tr><td>SPY 0DTE ATM</td><td class="n">0.890</td><td class="n" style="color:var(--green)">24.05</td><td class="n" style="color:var(--green)">0.726</td></tr>
+        <tr><td>SPY 1-day ATM</td><td class="n">0.727</td><td class="n">17.48</td><td class="n">0.584</td></tr>
+        <tr><td>SPY 8-day ATM</td><td class="n">0.884</td><td class="n">13.27</td><td class="n">0.447</td></tr>
+        <tr><td>QQQ 0DTE ATM</td><td class="n">0.645</td><td class="n">14.40</td><td class="n">0.487</td></tr>
+        <tr><td>SPY 8-day OTM</td><td class="n">1.046</td><td class="n">5.40</td><td class="n">0.118</td></tr>
+        </tbody></table></div>
+      <p class="small" style="margin-top:14px">Every slope positive, every t-statistic between 5.4 and 24.1. The
+      underlying explains <b>73% of the variance</b> in the SPY 0DTE contract's 40-second move. Slopes below 1
+      are expected rather than a defect: the quoted midpoint updates in discrete ticks and so understates true
+      moves, and implied volatility typically falls as the index rises, damping call moves.</p>
+    </div>
+
+    <div class="card">
+      <h3>But only above ~20 seconds — below that it actively hurts</h3>
+      <div class="tw" style="margin-top:14px"><table>
+        <thead><tr><th>Horizon</th><th>SPY 0DTE</th><th>SPY 1-day</th><th>QQQ 0DTE</th><th>Signal ÷ feed noise</th></tr></thead><tbody>
+        <tr><td class="n">2 s</td><td class="n" style="color:var(--clay)">−4.3%</td><td class="n" style="color:var(--clay)">−5.1%</td><td class="n" style="color:var(--clay)">−8.7%</td><td class="n">0.20</td></tr>
+        <tr><td class="n">10 s</td><td class="n">+10.6%</td><td class="n">+4.5%</td><td class="n" style="color:var(--clay)">−5.9%</td><td class="n">0.69</td></tr>
+        <tr><td class="n">20 s</td><td class="n">+28.3%</td><td class="n">+16.6%</td><td class="n">+4.5%</td><td class="n" style="color:var(--indigo)"><b>1.10 ← crossover</b></td></tr>
+        <tr><td class="n">40 s</td><td class="n" style="color:var(--green)">+48.9%</td><td class="n" style="color:var(--green)">+32.0%</td><td class="n" style="color:var(--green)">+22.7%</td><td class="n">1.68</td></tr>
+        </tbody></table></div>
+      <p class="small" style="margin-top:14px">RMSE improvement over a random walk. The signal only clears the
+      free feed's own noise floor at about twenty seconds — below that you are amplifying quote jitter, which is
+      why a naive fast polling loop makes the estimate <em>worse</em>. Both predictors are scored against a noisy
+      target, so common noise inflates both and pushes the ratio toward one: <b>these are lower bounds.</b></p>
+      <p class="small" style="margin-top:10px">Three design parameters fall out, none of them guessed: decision
+      cadence of 40–60 seconds, SPY over QQQ, and stay near the money. Also worth noting — Alpaca returns no
+      greeks whatsoever for same-day expiries, so the strongest row in the table is computed with our own
+      Black-Scholes engine on an intraday clock. <b>The platform gives you nothing exactly where the signal is
+      strongest.</b></p>
+    </div>
+
+    <div class="card">
+      <h3>The timing null was adequately powered — that's the point</h3>
+      <p class="small" style="margin-top:10px">A null result is only interesting if the experiment could have
+      detected the effect. Minimum detectable effect at 80% power, from the observed dispersion:</p>
+      <div class="tw" style="margin-top:14px"><table>
+        <thead><tr><th>Pairs</th><th>Smallest detectable effect</th><th>Detects the published ~$2.50?</th></tr></thead><tbody>
+        <tr><td class="n">4</td><td class="n">$2.20 / contract</td><td style="color:var(--green)">yes</td></tr>
+        <tr><td class="n">10 <b>← ours</b></td><td class="n">$1.39 / contract</td><td style="color:var(--green)">yes, comfortably</td></tr>
+        <tr><td class="n">77</td><td class="n">$0.50 / contract</td><td>—</td></tr>
+        <tr><td class="n">1000</td><td class="n">$0.14 / contract</td><td>—</td></tr>
+        </tbody></table></div>
+      <p class="small" style="margin-top:14px">We ran ten pairs; the effect we were testing for needed four.
+      The 95% interval <span class="mono">[−$0.82, +$1.12]</span> excludes it. We <em>cannot</em> rule out effects
+      below about 1.4¢ a share — and we say so rather than claiming a cleaner result than we have.</p>
+      <p class="small" style="margin-top:10px"><b>And we can say why, not merely that.</b> The waiting arm's raw
+      fills came in 2.4¢ higher while the underlying rose 2.8¢ during the wait — yet the costs differed by 0.15¢.
+      The real quote tracked the underlying almost exactly. Had it been stale, waiting would have paid. It didn't.
+      Muravyev &amp; Pearson sampled 2003–2006; market makers now requote in microseconds.</p>
+    </div>
+
+    <div class="card">
+      <h3>A finding we published, then withdrew</h3>
+      <div class="tw" style="margin-top:14px"><table>
+        <thead><tr><th>Free feature</th><th>Run 1 (n=17)</th><th>Run 2 (n=48)</th><th>Verdict</th></tr></thead><tbody>
+        <tr><td>Quoted width</td><td class="n">+0.944</td><td class="n" style="color:var(--green)">+0.893</td><td style="color:var(--green)">robust</td></tr>
+        <tr><td>Option price</td><td class="n">+0.873</td><td class="n" style="color:var(--green)">+0.789</td><td style="color:var(--green)">robust</td></tr>
+        <tr><td>Day volume</td><td class="n">−0.735</td><td class="n">−0.416</td><td>weakens</td></tr>
+        <tr><td><b>Ask size (depth)</b></td><td class="n">−0.897</td><td class="n" style="color:var(--clay)">−0.324</td><td style="color:var(--clay)"><b>did not replicate</b></td></tr>
+        <tr><td>Open interest</td><td class="n">−0.500</td><td class="n">−0.282</td><td>weak in both</td></tr>
+        <tr><td>Days to expiry</td><td class="n">−0.105</td><td class="n">+0.413</td><td style="color:var(--clay)">unstable</td></tr>
+        </tbody></table></div>
+      <p class="small" style="margin-top:14px">Spearman rank correlation with true spread. On the first sample we
+      reported ask size as the second-best predictor and noted that essentially no retail tool uses it.
+      <b>Replication killed it.</b> It was an artifact of a small sample dominated by deep in-the-money contracts.
+      Only quoted width and option price survive. The retraction stays on the page on purpose.</p>
+      <p class="small" style="margin-top:10px">One folklore casualty worth noting: <b>open interest is the weakest
+      usable predictor and errs both ways.</b> One contract with open interest of 1,703 — comfortably "safe" by the
+      standard retail screen — cost $306. Another with 199 cost $1.</p>
+    </div>
+
+    <div class="card">
+      <h3>The risk layer is not invented — it maps to SEC Rule 15c3-5</h3>
+      <p class="small" style="margin-top:10px">The Market Access Rule requires a broker-dealer to maintain
+      pre-trade controls. Our fourteen gates map onto its clauses:</p>
+      <div class="tw" style="margin-top:14px"><table>
+        <thead><tr><th>Clause</th><th>Requirement</th><th>Our gates</th></tr></thead><tbody>
+        <tr><td class="n">(c)(1)(i)</td><td>Pre-set credit / capital thresholds</td><td>per-trade 0.25%, daily 1.0%, drawdown 2.5%, aggregate 1.5%</td></tr>
+        <tr><td class="n">(c)(1)(ii)</td><td>Erroneous orders — price, size, duplication, rate</td><td>fat finger, price collar, liquidity gate, duplicate detection, throttle</td></tr>
+        <tr><td class="n">(c)(1)(iii)</td><td>Regulatory compliance before entry</td><td>uncovered shorts unrepresentable, expiry cutoffs, account guard</td></tr>
+        <tr><td class="n">(c)(2)</td><td>Immediate post-trade surveillance</td><td>every decision journalled with its reason</td></tr>
+        </tbody></table></div>
+      <p class="small" style="margin-top:14px"><b>The clause that shaped the design is (c)(1)(ii).</b> Its
+      erroneous-order controls exist to catch <em>your own system malfunctioning</em>, not the market moving.
+      Retail risk management is almost entirely about market risk; professional pre-trade risk assumes your own
+      code is the most likely thing to be broken. Knight Capital lost $460m in 45 minutes in 2012 to deprecated
+      code on one of eight servers, and the SEC charged them under this very rule — finding they had compiled an
+      inventory of controls rather than considered malfunctions in their own order router. Their system also
+      fired 97 warnings before the open that nobody acted on.</p>
+      <p class="small" style="margin-top:10px"><b>So one gate has no market-risk purpose at all:</b> after enough
+      consecutive refusals the kernel halts, on the reasoning that an agent being refused repeatedly is broken
+      rather than unlucky. Fourteen gates, twenty-three tests, no network required to run them.</p>
+    </div>
+
+    <div class="card">
+      <h3>What we claim, and what we refuse to</h3>
+      <div class="grid2" style="margin-top:14px">
+        <div>
+          <p class="small"><b style="color:var(--green)">Claimed</b></p>
+          <ul class="small" style="margin:8px 0 0;padding-left:18px">
+            <li>Execution measured against ground truth, with intervals</li>
+            <li>Risk enforced by tested gates with a regulatory basis</li>
+            <li>Every decision auditable, refusals included</li>
+            <li>Findings replicated — and one withdrawn when replication killed it</li>
+          </ul>
+        </div>
+        <div>
+          <p class="small"><b style="color:var(--clay)">Not claimed</b></p>
+          <ul class="small" style="margin:8px 0 0;padding-left:18px">
+            <li>That the strategy has an edge. A defined-risk credit spread is fairly priced under the risk-neutral measure.</li>
+            <li>That a few sessions of profit and loss means anything. A strategy earning a Sharpe of 0.8 produces about <b>+0.1%</b> over five sessions against a standard deviation near <b>0.9%</b> — a signal-to-noise ratio of roughly <b>0.11</b>.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="small" style="margin-top:16px">A short-volatility book showing a beautiful number over a few days
+      is the predicted output of the measurement error, not evidence of skill. Goetzmann, Ingersoll, Spiegel and
+      Welch (RFS 2007) show a fund that sells out-of-the-money options and holds cash has, whenever those options
+      expire worthless, a zero standard deviation and a positive excess return — and therefore an infinite Sharpe
+      ratio.</p>
+      <p class="small" style="margin-top:12px"><b>So the rules were fixed before the first trade.</b> Risk limits,
+      strategy and three falsifiable predictions were committed and hashed in advance — including the prediction
+      that profit and loss over the evaluation window will <em>not</em> be statistically distinguishable from zero.
+      Commit <span class="mono">bac24e3</span>.</p>
+    </div>
+
+    <div class="card plain">
+      <h3>Limitations, stated rather than buried</h3>
+      <ul class="small" style="margin:10px 0 0;padding-left:18px">
+        <li>Everything was measured on <b>one afternoon</b>. Microstructure results should be reasonably stable; the timing null may not be.</li>
+        <li>The gate study is <b>65 contracts</b>, mostly SPY. A per-contract cost cap stopped the sweep before it reached full cross-underlying coverage — deep in-the-money probes are expensive, which is itself the finding.</li>
+        <li>The timing test is <b>ten pairs on one contract</b>. Adequate for the effect it targeted, not for smaller ones.</li>
+        <li>Measurement noise is about one tick. The most liquid contract returned a true spread of <span class="mono">−$0.01</span> — the market moved between our buy and our sell. Read that as effectively zero, not a crossed market.</li>
+        <li>The regime signal uses a <b>two-point proxy</b> for the second principal component of the volatility term structure, not the component itself.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p class="small"><b>Midpoint</b> — an execution-quality report card for options traders, and an autonomous
+  agent that trades to earn a good one. Built on Alpaca's Trading API, MCP server and CLI.</p>
+  <p class="tiny" style="margin-top:12px">Paper trading only. Simulated results are hypothetical and do not
+  represent actual trading. Options involve substantial risk and are not suitable for all investors. Nothing here
+  is investment advice. Every figure on this page was recorded against live markets and can be recomputed from
+  the data in the repository.</p>
+</footer>

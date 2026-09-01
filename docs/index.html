@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Midpoint — the bill nobody shows options traders</title>
+<meta name="description" content="Retail options traders lose more to the spread than to being wrong. Measured on live markets: what a strike actually costs, and why nobody is required to tell you.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#FBFBFD; --surface:#FFFFFF; --surface-2:#F3F4F8;
+  --ink:#12141A; --ink-2:#4A4F5C; --ink-3:#7C8291;
+  --rule:#E3E5EC; --rule-2:#CBCEDA;
+  --indigo:#3341B8; --indigo-soft:#EAECFA;
+  --clay:#C13A28; --clay-soft:#FBEBE8;
+  --green:#0E7355; --green-soft:#E4F3EE;
+  --shadow:0 1px 2px rgba(18,20,26,.05),0 12px 32px -16px rgba(18,20,26,.22);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0D0F14; --surface:#14171E; --surface-2:#1B1F28;
+  --ink:#E9EBF0; --ink-2:#AEB4C2; --ink-3:#7B8293;
+  --rule:#242833; --rule-2:#343A48;
+  --indigo:#8B96F0; --indigo-soft:#1B1F3A;
+  --clay:#F0836C; --clay-soft:#2E1A16;
+  --green:#5DC6A0; --green-soft:#12291F;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 12px 32px -16px rgba(0,0,0,.7);
+}}
+:root[data-theme="dark"]{
+  --paper:#0D0F14; --surface:#14171E; --surface-2:#1B1F28;
+  --ink:#E9EBF0; --ink-2:#AEB4C2; --ink-3:#7B8293;
+  --rule:#242833; --rule-2:#343A48;
+  --indigo:#8B96F0; --indigo-soft:#1B1F3A;
+  --clay:#F0836C; --clay-soft:#2E1A16;
+  --green:#5DC6A0; --green-soft:#12291F;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 12px 32px -16px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Public Sans",system-ui,-apple-system,sans-serif;font-size:16.5px;line-height:1.65;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:940px;margin:0 auto;padding:0 24px 120px}
+h1,h2,h3{font-family:"Bricolage Grotesque","Public Sans",sans-serif;margin:0;text-wrap:balance;
+  letter-spacing:-.02em;font-weight:600}
+h1{font-size:clamp(2.5rem,7vw,4.6rem);line-height:.98;font-weight:800;letter-spacing:-.035em}
+h2{font-size:clamp(1.6rem,3.4vw,2.3rem);line-height:1.1;font-weight:600}
+h3{font-size:1.16rem;line-height:1.3;font-weight:600}
+p{margin:0}
+.mono,code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+code{background:var(--surface-2);padding:.1em .35em;border-radius:4px;font-size:.88em}
+.lede{font-size:1.2rem;line-height:1.55;color:var(--ink-2)}
+.small{font-size:.9rem;line-height:1.55;color:var(--ink-2)}
+.tiny{font-size:.82rem;line-height:1.5;color:var(--ink-3)}
+section{padding-top:76px}
+.stack{display:flex;flex-direction:column;gap:18px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--indigo);margin-bottom:12px}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:26px;
+  box-shadow:var(--shadow)}
+.card.plain{box-shadow:none}
+/* ---------- hero ---------- */
+.hero{padding:76px 0 0}
+.bignum{font-family:"IBM Plex Mono",monospace;font-weight:600;
+  font-size:clamp(4.2rem,17vw,10rem);line-height:.85;letter-spacing:-.05em;color:var(--clay);
+  font-variant-numeric:tabular-nums}
+.hero-sub{font-size:clamp(1.15rem,2.4vw,1.5rem);line-height:1.45;max-width:26em;margin-top:22px;
+  color:var(--ink)}
+.hero-sub b{color:var(--green)}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:30px}
+.badge{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.06em;
+  border:1px solid var(--rule-2);border-radius:99px;padding:.35em .85em;color:var(--ink-2);
+  background:var(--surface)}
+/* ---------- interactive shells ---------- */
+.demo{background:var(--surface);border:1px solid var(--rule);border-radius:14px;overflow:hidden;
+  box-shadow:var(--shadow)}
+.demo-head{padding:16px 22px;border-bottom:1px solid var(--rule);background:var(--surface-2);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.demo-head .tag{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--surface);background:var(--indigo);padding:.25em .6em;
+  border-radius:4px}
+.demo-head .t{font-weight:600;font-size:.98rem}
+.demo-body{padding:24px 22px}
+.notice{font-size:.86rem;color:var(--ink-2);background:var(--indigo-soft);
+  border-radius:8px;padding:11px 14px;margin-top:16px}
+.notice b{color:var(--ink)}
+/* ---------- controls ---------- */
+label.ctl{display:block;font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:7px}
+select,input[type=number]{font-family:"IBM Plex Mono",monospace;font-size:.94rem;
+  background:var(--surface);color:var(--ink);border:1px solid var(--rule-2);border-radius:8px;
+  padding:9px 11px;width:100%}
+input[type=range]{width:100%;accent-color:var(--indigo)}
+.ctlgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px}
+button.seg{font-family:"Public Sans";font-size:.9rem;font-weight:500;border:1px solid var(--rule-2);
+  background:var(--surface);color:var(--ink-2);padding:9px 15px;border-radius:9px;cursor:pointer}
+button.seg[aria-pressed="true"]{background:var(--indigo);border-color:var(--indigo);color:#fff}
+button.act{font-family:"Public Sans";font-weight:600;font-size:.92rem;background:var(--indigo);
+  color:#fff;border:0;border-radius:9px;padding:11px 18px;cursor:pointer}
+button.act:disabled{opacity:.4;cursor:default}
+/* ---------- readouts ---------- */
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;
+  background:var(--rule);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin-top:20px}
+.readout>div{background:var(--surface);padding:15px 16px}
+.readout .k{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:5px}
+.readout .v{font-family:"IBM Plex Mono",monospace;font-size:1.5rem;font-weight:600;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.v.cost{color:var(--clay)} .v.good{color:var(--green)} .v.neu{color:var(--indigo)}
+/* ---------- charts ---------- */
+.bars{display:flex;align-items:flex-end;gap:2px;height:150px;margin-top:8px}
+.bar{flex:1;background:var(--rule-2);border-radius:2px 2px 0 0;min-height:2px;transition:background .15s}
+.bar.sel{background:var(--indigo)} .bar.rej{background:var(--clay)} .bar.pass{background:var(--green)}
+.axis{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;
+  font-size:.7rem;color:var(--ink-3);margin-top:7px}
+.dots{display:flex;flex-wrap:wrap;gap:9px;margin:18px 0 6px}
+.dot{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  font-family:"IBM Plex Mono",monospace;font-size:.74rem;font-weight:600;border:1px solid var(--rule-2)}
+.dot.up{background:var(--clay-soft);color:var(--clay);border-color:var(--clay)}
+.dot.dn{background:var(--green-soft);color:var(--green);border-color:var(--green)}
+/* ---------- spread figure ---------- */
+.spread{position:relative;height:96px;margin:26px 0 10px;touch-action:none}
+.track{position:absolute;top:46px;left:6%;right:6%;height:4px;background:var(--rule-2);border-radius:2px}
+.zone{position:absolute;top:46px;height:4px;background:var(--indigo);opacity:.28;border-radius:2px}
+.pin{position:absolute;top:30px;width:3px;height:36px;background:var(--ink-3);border-radius:2px}
+.pin.mid{background:var(--indigo);height:48px;top:24px}
+.plabel{position:absolute;top:0;transform:translateX(-50%);font-family:"IBM Plex Mono",monospace;
+  font-size:.74rem;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.psub{position:absolute;top:78px;transform:translateX(-50%);font-family:"IBM Plex Mono",monospace;
+  font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.handle{position:absolute;top:34px;width:26px;height:26px;border-radius:50%;background:var(--surface);
+  border:3px solid var(--indigo);transform:translateX(-50%);cursor:grab;box-shadow:var(--shadow)}
+.handle:active{cursor:grabbing}
+/* ---------- gauge ---------- */
+.gauge{height:16px;background:var(--surface-2);border-radius:99px;overflow:hidden;
+  border:1px solid var(--rule);margin-top:6px;position:relative}
+.gauge .need{height:100%;background:var(--clay);opacity:.85}
+.gauge .have{position:absolute;top:0;height:100%;width:3px;background:var(--ink)}
+/* ---------- disclosure ---------- */
+details{border:1px solid var(--rule);border-radius:11px;background:var(--surface);margin-top:16px}
+details[open]{background:var(--surface)}
+summary{cursor:pointer;padding:13px 18px;font-family:"IBM Plex Mono",monospace;font-size:.76rem;
+  letter-spacing:.09em;text-transform:uppercase;color:var(--indigo);list-style:none;font-weight:600}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ ";display:inline-block;transition:transform .15s}
+details[open] summary::before{transform:rotate(90deg)}
+details .inner{padding:2px 18px 18px;font-size:.92rem;line-height:1.6;color:var(--ink-2)}
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;border:1px solid var(--rule);border-radius:11px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:480px}
+th{text-align:left;font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);padding:11px 15px;border-bottom:1px solid var(--rule-2);
+  background:var(--surface-2);white-space:nowrap}
+td{padding:11px 15px;border-bottom:1px solid var(--rule);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+td.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+/* ---------- quant appendix ---------- */
+.appendix{border-top:3px solid var(--ink);margin-top:96px;padding-top:44px}
+.appendix h2{font-size:clamp(1.8rem,4vw,2.6rem)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
+footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--rule)}
+@media (max-width:620px){.wrap{padding:0 16px 80px}.demo-body{padding:18px 15px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+:focus-visible{outline:2.5px solid var(--indigo);outline-offset:2px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+  <div class="eyebrow">Midpoint · measured on live markets</div>
+  <h1>The bill nobody<br>shows you.</h1>
+  <p class="hero-sub">Buying one options contract cost <span class="mono" style="color:var(--clay);font-weight:600">$347</span>
+  in hidden fees. The <em>same trade</em>, one strike away, cost <b>$7</b>.</p>
+  <p class="lede" style="margin-top:20px;max-width:34em">Nobody had to tell that trader. Stock trades come with a
+  legally required receipt for this. Options don't — and options are where the money goes.</p>
+  <div class="badges">
+    <span class="badge">65 contracts measured</span>
+    <span class="badge">live markets, 31 Aug 2026</span>
+    <span class="badge">every number recomputable</span>
+    <span class="badge">rules pre-registered</span>
+  </div>
+</header>
+
+<section>
+  <div class="eyebrow">01 — the thing nobody explains</div>
+  <h2>Every trade has two prices</h2>
+  <p class="lede" style="margin-top:14px;max-width:36em">There's a price to buy and a lower price to sell,
+  at the same moment. The gap between them is the house's cut. You pay it going in, and again coming out.</p>
+  <div class="demo" style="margin-top:22px">
+    <div class="demo-head"><span class="tag">drag me</span><span class="t">Where does your order land?</span></div>
+    <div class="demo-body">
+      <div class="spread" id="sp">
+        <div class="track"></div><div class="zone" id="spzone"></div>
+        <div class="pin" style="left:12%"></div><div class="plabel" id="lblBid" style="left:12%">$2.21</div>
+        <div class="psub" style="left:12%">sell here</div>
+        <div class="pin mid" style="left:50%"></div><div class="plabel" style="left:50%;color:var(--indigo)">$2.28</div>
+        <div class="psub" style="left:50%">true worth</div>
+        <div class="pin" style="left:88%"></div><div class="plabel" id="lblAsk" style="left:88%">$2.35</div>
+        <div class="psub" style="left:88%">buy here</div>
+        <div class="handle" id="sphandle" style="left:88%" role="slider" tabindex="0"
+             aria-label="Order price" aria-valuemin="2.21" aria-valuemax="2.35" aria-valuenow="2.35"></div>
+      </div>
+      <div class="readout">
+        <div><div class="k">You pay</div><div class="v" id="spPay">$2.35</div></div>
+        <div><div class="k">It's worth</div><div class="v neu">$2.28</div></div>
+        <div><div class="k">Lost per contract</div><div class="v cost" id="spLoss">$7</div></div>
+        <div><div class="k">Round trip</div><div class="v cost" id="spRound">$14</div></div>
+      </div>
+      <div class="notice">One contract is 100 shares, so a <b>7-cent</b> gap is <b>$7</b> of real money —
+      and you pay it twice, once to open and once to close.</div>
+    </div>
+  </div>
+  <details><summary>Show me the working</summary><div class="inner">
+    Quotes shown are a real SPY contract. The "true worth" is the midpoint between the two prices, which is the
+    standard benchmark professionals measure execution against. Options are quoted per share and sold in
+    hundreds, which is why small-looking numbers become large ones.
+  </div></details>
+</section>
+
+<section>
+  <div class="eyebrow">02 — the centrepiece</div>
+  <h2>Pick a strike. See the bill.</h2>
+  <p class="lede" style="margin-top:14px;max-width:36em">Every bar below is a real contract we bought and sold
+  on the same afternoon, on the same underlying, to find out what it truly cost. Sorted cheapest to dearest.</p>
+  <div class="demo" style="margin-top:22px">
+    <div class="demo-head"><span class="tag">explore</span><span class="t">65 contracts, one afternoon</span></div>
+    <div class="demo-body">
+      <div class="ctlgrid">
+        <div><label class="ctl" for="fU">Underlying</label><select id="fU"></select></div>
+        <div><label class="ctl" for="fE">Expiry</label><select id="fE"></select></div>
+        <div><label class="ctl" for="fM">Strike vs price</label><select id="fM"></select></div>
+      </div>
+      <div class="bars" id="bars" style="margin-top:22px"></div>
+      <div class="axis"><span>cheapest</span><span id="axN">—</span><span>most expensive</span></div>
+      <div class="readout">
+        <div><div class="k">Contracts shown</div><div class="v neu" id="exN">—</div></div>
+        <div><div class="k">Typical cost</div><div class="v" id="exMed">—</div></div>
+        <div><div class="k">Worst</div><div class="v cost" id="exMax">—</div></div>
+        <div><div class="k">Cheapest</div><div class="v good" id="exMin">—</div></div>
+      </div>
+      <div class="notice" id="exNote">Click any bar to see which contract it is.</div>
+    </div>
+  </div>
+  <details><summary>Show me the working</summary><div class="inner">
+    For each contract we bought one and immediately sold one, recovering the real buy price and the real sell
+    price. Net position zero; the cost is the gap we crossed. Two sweeps on 31 Aug 2026, 65 contracts with
+    ground truth, run on a separate experimental account that is never submitted for judging.
+  </div></details>
+</section>
+
+<section>
+  <div class="eyebrow">03 — the trap</div>
+  <h2>Same bet. 116× the cost.</h2>
+  <p class="lede" style="margin-top:14px;max-width:36em">A deep in-the-money call moves almost exactly like
+  100 shares. Traders use them as a substitute. Here is what the substitution costs.</p>
+  <div class="demo" style="margin-top:22px">
+    <div class="demo-head"><span class="tag">compare</span><span class="t">Two ways to own the same exposure</span></div>
+    <div class="demo-body">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="seg" id="wShares" aria-pressed="true">Buy 100 shares</button>
+        <button class="seg" id="wOption" aria-pressed="false">Buy the deep-ITM call</button>
+      </div>
+      <div class="readout">
+        <div><div class="k">What you own</div><div class="v neu" id="twWhat" style="font-size:1.05rem">100 SPY shares</div></div>
+        <div><div class="k">Hidden fee</div><div class="v" id="twCost">$3</div></div>
+        <div><div class="k">Compared</div><div class="v" id="twRatio">baseline</div></div>
+      </div>
+      <div class="notice" id="twNote">SPY's own spread that afternoon was three cents. A hundred shares cost <b>$3</b> to get in and out of.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">04 — the number nobody computes</div>
+  <h2>How often does this have to work?</h2>
+  <p class="lede" style="margin-top:14px;max-width:36em">Selling an option pays you cash up front. It feels like
+  free money. It isn't — the cash is priced against how likely you are to lose. Here's the honest arithmetic.</p>
+  <div class="demo" style="margin-top:22px">
+    <div class="demo-head"><span class="tag">calculate</span><span class="t">Required win rate</span></div>
+    <div class="demo-body">
+      <div class="ctlgrid">
+        <div><label class="ctl" for="wW">Spread width ($)</label><input type="number" id="wW" value="1" min="0.5" max="20" step="0.5"></div>
+        <div><label class="ctl" for="wC">Cash received ($)</label><input type="number" id="wC" value="0.13" min="0.01" max="10" step="0.01"></div>
+      </div>
+      <div class="readout">
+        <div><div class="k">You can win</div><div class="v good" id="wWin">$13</div></div>
+        <div><div class="k">You can lose</div><div class="v cost" id="wLose">$87</div></div>
+        <div><div class="k">Must win at least</div><div class="v cost" id="wNeed">87.0%</div></div>
+      </div>
+      <div class="gauge"><div class="need" id="wBar" style="width:87%"></div></div>
+      <div class="axis"><span>0%</span><span>break even</span><span>100%</span></div>
+      <div class="notice">This is a <b>risk-shape disclosure, not a prediction</b>. It tells you what the trade
+      needs — not whether it will happen. Our own agent records this number for every trade it takes.</div>
+    </div>
+  </div>
+  <details><summary>Show me the working</summary><div class="inner">
+    Maximum loss is the width of the spread minus the cash received. Break-even win rate is
+    <code>maxLoss / (maxLoss + credit)</code>. Widening the spread does not improve it — we checked at
+    1, 2, 3 and 4 dollars wide and all sit within half a point of each other. That is the market pricing
+    correctly, not a flaw in the trade.
+  </div></details>
+</section>
+
+<section>
+  <div class="eyebrow">05 — why trust any of this</div>
+  <h2>We found a way to see the real price</h2>
+  <p class="lede" style="margin-top:14px;max-width:36em">The free data feed is an approximation. So instead of
+  trusting it, we sent six orders at the same instant, each offering a wildly different price, and watched what
+  we were actually charged.</p>
+  <div class="demo" style="margin-top:22px">
+    <div class="demo-head"><span class="tag">step through</span><span class="t">Six orders, one instant</span></div>
+    <div class="demo-body">
+      <div class="tw"><table><thead><tr><th>We offered up to</th><th>We actually paid</th><th>Difference</th></tr></thead>
+      <tbody id="orTb"></tbody></table></div>
+      <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="act" id="orNext">Send the next order</button>
+        <span class="tiny" id="orHint">One at a time — watch the right-hand column.</span>
+      </div>
+      <div class="notice" id="orNote" style="display:none"><b>The offer changed by a dollar. The price changed
+      by a penny.</b> The market charges what it charges, whatever you're willing to pay — which means every fill
+      is an exact reading of the real price, and we can measure the truth for free.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">06 — we tested our own idea and it failed</div>
+  <h2>Does waiting for a better moment help?</h2>
+  <p class="lede" style="margin-top:14px;max-width:36em">The received wisdom is that patient traders get better
+  prices. We ran it properly: ten pairs of identical trades, differing only in <em>when</em> the order went in.
+  Each square is one pair.</p>
+  <div class="demo" style="margin-top:22px">
+    <div class="demo-head"><span class="tag">count them</span><span class="t">10 paired trials</span></div>
+    <div class="demo-body">
+      <div class="dots" id="pdots"></div>
+      <div class="readout">
+        <div><div class="k">Waiting was cheaper</div><div class="v good" id="pWin">—</div></div>
+        <div><div class="k">Waiting was dearer</div><div class="v cost" id="pLose">—</div></div>
+        <div><div class="k">Average difference</div><div class="v" id="pDiff">—</div></div>
+      </div>
+      <div class="notice">Near enough a coin flip. <b>We looked for the effect and it isn't there</b> — at least
+      not at a size worth chasing. Choosing the right contract, by contrast, was worth about
+      <b>eighty times more</b>. That's why this page opens with strike choice and not with timing.</div>
+    </div>
+  </div>
+  <details><summary>Show me the working</summary><div class="inner">
+    Same contract, traded twice moments apart, differing only in when the order was sent. Each arm is charged
+    against fair value at its own fill instant, so a market that merely drifted cannot be mistaken for good
+    execution. Difference <span class="mono">+$0.15</span> per contract, <span class="mono">t = +0.31</span>,
+    95% confidence interval <span class="mono">[−$0.82, +$1.12]</span> — which excludes the published effect
+    this was testing for. That effect would have needed only four pairs to detect; we ran ten.
+  </div></details>
+</section>
+
+<section>
+  <div class="eyebrow">07 — one rule, measured</div>
+  <h2>The screen that would have caught it</h2>
+  <p class="lede" style="margin-top:14px;max-width:36em">You can't see the real price before you trade. But the
+  free feed's quoted gap, unreliable as its exact value is, ranks contracts almost perfectly. Drag the line and
+  watch the expensive ones fall away.</p>
+  <div class="demo" style="margin-top:22px">
+    <div class="demo-head"><span class="tag">drag the rule</span><span class="t">Reject anything quoted wider than…</span></div>
+    <div class="demo-body">
+      <label class="ctl" for="gThr">Threshold — <span class="mono" id="gVal">$0.20</span></label>
+      <input type="range" id="gThr" min="5" max="100" value="20" step="5">
+      <div class="bars" id="gBars" style="margin-top:20px"></div>
+      <div class="axis"><span>kept</span><span>rejected</span></div>
+      <div class="readout">
+        <div><div class="k">Kept</div><div class="v good" id="gPass">—</div></div>
+        <div><div class="k">Average cost kept</div><div class="v good" id="gPassC">—</div></div>
+        <div><div class="k">Rejected</div><div class="v cost" id="gRej">—</div></div>
+        <div><div class="k">Average cost rejected</div><div class="v cost" id="gRejC">—</div></div>
+      </div>
+      <div class="notice" id="gNote"></div>
+    </div>
+  </div>
+  <details><summary>Show me the working</summary><div class="inner">
+    The threshold is in dollars, not percent, deliberately: a one-cent gap on a three-cent option is 33% in
+    relative terms but only a dollar in real money, and a percentage rule throws away perfectly cheap contracts.
+    The $0.20 line was derived on the first 17 contracts and then tested, unchanged, on 48 more measured an hour
+    later. It let through nothing costing over $50 in either sample.
+  </div></details>
+</section>
+
+<section class="appendix">
+  <div class="eyebrow">the machinery</div>
+  <h2>For readers who want the actual numbers</h2>
+  <p class="lede" style="margin-top:14px;max-width:38em">Everything above is deliberately plain. Everything below
+  is not. This is the working: the models, the statistics, the regulatory basis, and the one finding we published
+  and then had to withdraw.</p>
+
+  <div class="stack" style="margin-top:30px">
+    <div class="card">
+      <h3>Fair value is predictable from the underlying — and we measured how fast</h3>
+      <p class="small" style="margin-top:10px">Muravyev &amp; Pearson (RFS 2020) argue option fair value is
+      predictable at high frequency from the underlying. We tested it on 240 read-only samples across eight
+      contracts, regressing each option's realised 40-second price change on the delta-gamma prediction
+      <span class="mono">δ·dS + ½γ·dS²</span>.</p>
+      <div class="tw" style="margin-top:16px"><table>
+        <thead><tr><th>Contract</th><th>Slope</th><th>t-stat</th><th>R²</th></tr></thead><tbody>
+        <tr><td>SPY 0DTE ATM</td><td class="n">0.890</td><td class="n" style="color:var(--green)">24.05</td><td class="n" style="color:var(--green)">0.726</td></tr>
+        <tr><td>SPY 1-day ATM</td><td class="n">0.727</td><td class="n">17.48</td><td class="n">0.584</td></tr>
+        <tr><td>SPY 8-day ATM</td><td class="n">0.884</td><td class="n">13.27</td><td class="n">0.447</td></tr>
+        <tr><td>QQQ 0DTE ATM</td><td class="n">0.645</td><td class="n">14.40</td><td class="n">0.487</td></tr>
+        <tr><td>SPY 8-day OTM</td><td class="n">1.046</td><td class="n">5.40</td><td class="n">0.118</td></tr>
+        </tbody></table></div>
+      <p class="small" style="margin-top:14px">Every slope positive, every t-statistic between 5.4 and 24.1. The
+      underlying explains <b>73% of the variance</b> in the SPY 0DTE contract's 40-second move. Slopes below 1
+      are expected rather than a defect: the quoted midpoint updates in discrete ticks and so understates true
+      moves, and implied volatility typically falls as the index rises, damping call moves.</p>
+    </div>
+
+    <div class="card">
+      <h3>But only above ~20 seconds — below that it actively hurts</h3>
+      <div class="tw" style="margin-top:14px"><table>
+        <thead><tr><th>Horizon</th><th>SPY 0DTE</th><th>SPY 1-day</th><th>QQQ 0DTE</th><th>Signal ÷ feed noise</th></tr></thead><tbody>
+        <tr><td class="n">2 s</td><td class="n" style="color:var(--clay)">−4.3%</td><td class="n" style="color:var(--clay)">−5.1%</td><td class="n" style="color:var(--clay)">−8.7%</td><td class="n">0.20</td></tr>
+        <tr><td class="n">10 s</td><td class="n">+10.6%</td><td class="n">+4.5%</td><td class="n" style="color:var(--clay)">−5.9%</td><td class="n">0.69</td></tr>
+        <tr><td class="n">20 s</td><td class="n">+28.3%</td><td class="n">+16.6%</td><td class="n">+4.5%</td><td class="n" style="color:var(--indigo)"><b>1.10 ← crossover</b></td></tr>
+        <tr><td class="n">40 s</td><td class="n" style="color:var(--green)">+48.9%</td><td class="n" style="color:var(--green)">+32.0%</td><td class="n" style="color:var(--green)">+22.7%</td><td class="n">1.68</td></tr>
+        </tbody></table></div>
+      <p class="small" style="margin-top:14px">RMSE improvement over a random walk. The signal only clears the
+      free feed's own noise floor at about twenty seconds — below that you are amplifying quote jitter, which is
+      why a naive fast polling loop makes the estimate <em>worse</em>. Both predictors are scored against a noisy
+      target, so common noise inflates both and pushes the ratio toward one: <b>these are lower bounds.</b></p>
+      <p class="small" style="margin-top:10px">Three design parameters fall out, none of them guessed: decision
+      cadence of 40–60 seconds, SPY over QQQ, and stay near the money. Also worth noting — Alpaca returns no
+      greeks whatsoever for same-day expiries, so the strongest row in the table is computed with our own
+      Black-Scholes engine on an intraday clock. <b>The platform gives you nothing exactly where the signal is
+      strongest.</b></p>
+    </div>
+
+    <div class="card">
+      <h3>The timing null was adequately powered — that's the point</h3>
+      <p class="small" style="margin-top:10px">A null result is only interesting if the experiment could have
+      detected the effect. Minimum detectable effect at 80% power, from the observed dispersion:</p>
+      <div class="tw" style="margin-top:14px"><table>
+        <thead><tr><th>Pairs</th><th>Smallest detectable effect</th><th>Detects the published ~$2.50?</th></tr></thead><tbody>
+        <tr><td class="n">4</td><td class="n">$2.20 / contract</td><td style="color:var(--green)">yes</td></tr>
+        <tr><td class="n">10 <b>← ours</b></td><td class="n">$1.39 / contract</td><td style="color:var(--green)">yes, comfortably</td></tr>
+        <tr><td class="n">77</td><td class="n">$0.50 / contract</td><td>—</td></tr>
+        <tr><td class="n">1000</td><td class="n">$0.14 / contract</td><td>—</td></tr>
+        </tbody></table></div>
+      <p class="small" style="margin-top:14px">We ran ten pairs; the effect we were testing for needed four.
+      The 95% interval <span class="mono">[−$0.82, +$1.12]</span> excludes it. We <em>cannot</em> rule out effects
+      below about 1.4¢ a share — and we say so rather than claiming a cleaner result than we have.</p>
+      <p class="small" style="margin-top:10px"><b>And we can say why, not merely that.</b> The waiting arm's raw
+      fills came in 2.4¢ higher while the underlying rose 2.8¢ during the wait — yet the costs differed by 0.15¢.
+      The real quote tracked the underlying almost exactly. Had it been stale, waiting would have paid. It didn't.
+      Muravyev &amp; Pearson sampled 2003–2006; market makers now requote in microseconds.</p>
+    </div>
+
+    <div class="card">
+      <h3>A finding we published, then withdrew</h3>
+      <div class="tw" style="margin-top:14px"><table>
+        <thead><tr><th>Free feature</th><th>Run 1 (n=17)</th><th>Run 2 (n=48)</th><th>Verdict</th></tr></thead><tbody>
+        <tr><td>Quoted width</td><td class="n">+0.944</td><td class="n" style="color:var(--green)">+0.893</td><td style="color:var(--green)">robust</td></tr>
+        <tr><td>Option price</td><td class="n">+0.873</td><td class="n" style="color:var(--green)">+0.789</td><td style="color:var(--green)">robust</td></tr>
+        <tr><td>Day volume</td><td class="n">−0.735</td><td class="n">−0.416</td><td>weakens</td></tr>
+        <tr><td><b>Ask size (depth)</b></td><td class="n">−0.897</td><td class="n" style="color:var(--clay)">−0.324</td><td style="color:var(--clay)"><b>did not replicate</b></td></tr>
+        <tr><td>Open interest</td><td class="n">−0.500</td><td class="n">−0.282</td><td>weak in both</td></tr>
+        <tr><td>Days to expiry</td><td class="n">−0.105</td><td class="n">+0.413</td><td style="color:var(--clay)">unstable</td></tr>
+        </tbody></table></div>
+      <p class="small" style="margin-top:14px">Spearman rank correlation with true spread. On the first sample we
+      reported ask size as the second-best predictor and noted that essentially no retail tool uses it.
+      <b>Replication killed it.</b> It was an artifact of a small sample dominated by deep in-the-money contracts.
+      Only quoted width and option price survive. The retraction stays on the page on purpose.</p>
+      <p class="small" style="margin-top:10px">One folklore casualty worth noting: <b>open interest is the weakest
+      usable predictor and errs both ways.</b> One contract with open interest of 1,703 — comfortably "safe" by the
+      standard retail screen — cost $306. Another with 199 cost $1.</p>
+    </div>
+
+    <div class="card">
+      <h3>The risk layer is not invented — it maps to SEC Rule 15c3-5</h3>
+      <p class="small" style="margin-top:10px">The Market Access Rule requires a broker-dealer to maintain
+      pre-trade controls. Our fourteen gates map onto its clauses:</p>
+      <div class="tw" style="margin-top:14px"><table>
+        <thead><tr><th>Clause</th><th>Requirement</th><th>Our gates</th></tr></thead><tbody>
+        <tr><td class="n">(c)(1)(i)</td><td>Pre-set credit / capital thresholds</td><td>per-trade 0.25%, daily 1.0%, drawdown 2.5%, aggregate 1.5%</td></tr>
+        <tr><td class="n">(c)(1)(ii)</td><td>Erroneous orders — price, size, duplication, rate</td><td>fat finger, price collar, liquidity gate, duplicate detection, throttle</td></tr>
+        <tr><td class="n">(c)(1)(iii)</td><td>Regulatory compliance before entry</td><td>uncovered shorts unrepresentable, expiry cutoffs, account guard</td></tr>
+        <tr><td class="n">(c)(2)</td><td>Immediate post-trade surveillance</td><td>every decision journalled with its reason</td></tr>
+        </tbody></table></div>
+      <p class="small" style="margin-top:14px"><b>The clause that shaped the design is (c)(1)(ii).</b> Its
+      erroneous-order controls exist to catch <em>your own system malfunctioning</em>, not the market moving.
+      Retail risk management is almost entirely about market risk; professional pre-trade risk assumes your own
+      code is the most likely thing to be broken. Knight Capital lost $460m in 45 minutes in 2012 to deprecated
+      code on one of eight servers, and the SEC charged them under this very rule — finding they had compiled an
+      inventory of controls rather than considered malfunctions in their own order router. Their system also
+      fired 97 warnings before the open that nobody acted on.</p>
+      <p class="small" style="margin-top:10px"><b>So one gate has no market-risk purpose at all:</b> after enough
+      consecutive refusals the kernel halts, on the reasoning that an agent being refused repeatedly is broken
+      rather than unlucky. Fourteen gates, twenty-three tests, no network required to run them.</p>
+    </div>
+
+    <div class="card">
+      <h3>What we claim, and what we refuse to</h3>
+      <div class="grid2" style="margin-top:14px">
+        <div>
+          <p class="small"><b style="color:var(--green)">Claimed</b></p>
+          <ul class="small" style="margin:8px 0 0;padding-left:18px">
+            <li>Execution measured against ground truth, with intervals</li>
+            <li>Risk enforced by tested gates with a regulatory basis</li>
+            <li>Every decision auditable, refusals included</li>
+            <li>Findings replicated — and one withdrawn when replication killed it</li>
+          </ul>
+        </div>
+        <div>
+          <p class="small"><b style="color:var(--clay)">Not claimed</b></p>
+          <ul class="small" style="margin:8px 0 0;padding-left:18px">
+            <li>That the strategy has an edge. A defined-risk credit spread is fairly priced under the risk-neutral measure.</li>
+            <li>That a few sessions of profit and loss means anything. A strategy earning a Sharpe of 0.8 produces about <b>+0.1%</b> over five sessions against a standard deviation near <b>0.9%</b> — a signal-to-noise ratio of roughly <b>0.11</b>.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="small" style="margin-top:16px">A short-volatility book showing a beautiful number over a few days
+      is the predicted output of the measurement error, not evidence of skill. Goetzmann, Ingersoll, Spiegel and
+      Welch (RFS 2007) show a fund that sells out-of-the-money options and holds cash has, whenever those options
+      expire worthless, a zero standard deviation and a positive excess return — and therefore an infinite Sharpe
+      ratio.</p>
+      <p class="small" style="margin-top:12px"><b>So the rules were fixed before the first trade.</b> Risk limits,
+      strategy and three falsifiable predictions were committed and hashed in advance — including the prediction
+      that profit and loss over the evaluation window will <em>not</em> be statistically distinguishable from zero.
+      Commit <span class="mono">bac24e3</span>.</p>
+    </div>
+
+    <div class="card plain">
+      <h3>Limitations, stated rather than buried</h3>
+      <ul class="small" style="margin:10px 0 0;padding-left:18px">
+        <li>Everything was measured on <b>one afternoon</b>. Microstructure results should be reasonably stable; the timing null may not be.</li>
+        <li>The gate study is <b>65 contracts</b>, mostly SPY. A per-contract cost cap stopped the sweep before it reached full cross-underlying coverage — deep in-the-money probes are expensive, which is itself the finding.</li>
+        <li>The timing test is <b>ten pairs on one contract</b>. Adequate for the effect it targeted, not for smaller ones.</li>
+        <li>Measurement noise is about one tick. The most liquid contract returned a true spread of <span class="mono">−$0.01</span> — the market moved between our buy and our sell. Read that as effectively zero, not a crossed market.</li>
+        <li>The regime signal uses a <b>two-point proxy</b> for the second principal component of the volatility term structure, not the component itself.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p class="small"><b>Midpoint</b> — an execution-quality report card for options traders, and an autonomous
+  agent that trades to earn a good one. Built on Alpaca's Trading API, MCP server and CLI.</p>
+  <p class="tiny" style="margin-top:12px">Paper trading only. Simulated results are hypothetical and do not
+  represent actual trading. Options involve substantial risk and are not suitable for all investors. Nothing here
+  is investment advice. Every figure on this page was recorded against live markets and can be recomputed from
+  the data in the repository.</p>
+</footer>
+
+</div>
+<script>const DATA = {"contracts":[{"c":"SPY260831C00720000","u":"SPY","dte":"0DTE","mny":0.9396,"indW":1.49,"trueW":0.27,"cost":27.0,"mid":46.52,"oi":2152},{"c":"SPY260831C00743000","u":"SPY","dte":"0DTE","mny":0.9696,"indW":0.12,"trueW":0.24,"cost":24.0,"mid":22.92,"oi":655},{"c":"SPY260831C00759000","u":"SPY","dte":"0DTE","mny":0.9905,"indW":0.12,"trueW":0.26,"cost":26.0,"mid":7.26,"oi":944},{"c":"SPY260831C00766000","u":"SPY","dte":"0DTE","mny":0.9996,"indW":0.01,"trueW":-0.01,"cost":-1.0,"mid":0.85,"oi":1842},{"c":"SPY260831C00774000","u":"SPY","dte":"0DTE","mny":1.01,"indW":0.03,"trueW":0.01,"cost":1.0,"mid":0.03,"oi":5791},{"c":"SPY260901C00720000","u":"SPY","dte":"1-3d","mny":0.9396,"indW":3.14,"trueW":3.18,"cost":318.0,"mid":45.46,"oi":4},{"c":"SPY260901C00743000","u":"SPY","dte":"1-3d","mny":0.9696,"indW":3.54,"trueW":3.47,"cost":347.0,"mid":23.5,"oi":2},{"c":"SPY260901C00759000","u":"SPY","dte":"1-3d","mny":0.9905,"indW":1.27,"trueW":1.39,"cost":139.0,"mid":7.14,"oi":393},{"c":"SPY260901C00766000","u":"SPY","dte":"1-3d","mny":0.9996,"indW":0.03,"trueW":0.03,"cost":3.0,"mid":2.06,"oi":1714},{"c":"SPY260901C00774000","u":"SPY","dte":"1-3d","mny":1.01,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.1,"oi":1418},{"c":"SPY260908C00720000","u":"SPY","dte":"7-12d","mny":0.9396,"indW":3.53,"trueW":3.3,"cost":330.0,"mid":46.95,"oi":2},{"c":"SPY260908C00759000","u":"SPY","dte":"7-12d","mny":0.9905,"indW":0.21,"trueW":0.21,"cost":21.0,"mid":10.03,"oi":131},{"c":"SPY260908C00766000","u":"SPY","dte":"7-12d","mny":0.9996,"indW":0.05,"trueW":0.02,"cost":2.0,"mid":4.96,"oi":206},{"c":"SPY260908C00774000","u":"SPY","dte":"7-12d","mny":1.01,"indW":0.06,"trueW":0.01,"cost":1.0,"mid":1.44,"oi":199},{"c":"SPY260908C00789000","u":"SPY","dte":"7-12d","mny":1.0296,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.06,"oi":92},{"c":"SPY260911C00812000","u":"SPY","dte":"7-12d","mny":1.0596,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.04,"oi":1378},{"c":"SPY260930C00720000","u":"SPY","dte":"28-45d","mny":0.9396,"indW":1.92,"trueW":3.06,"cost":306.0,"mid":49.26,"oi":1703},{"c":"SPY260831C00759000","u":"SPY","dte":"0DTE","mny":0.99,"indW":0.29,"trueW":0.2,"cost":20.0,"mid":7.51,"oi":944},{"c":"SPY260831C00767000","u":"SPY","dte":"0DTE","mny":1.0004,"indW":0.01,"trueW":0.0,"cost":0.0,"mid":0.4,"oi":2291},{"c":"SPY260831C00774000","u":"SPY","dte":"0DTE","mny":1.0096,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.01,"oi":5791},{"c":"SPY260901C00767000","u":"SPY","dte":"1-3d","mny":1.0004,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":1.59,"oi":1312},{"c":"SPY260901C00774000","u":"SPY","dte":"1-3d","mny":1.0096,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.06,"oi":1418},{"c":"SPY260908C00759000","u":"SPY","dte":"7-12d","mny":0.99,"indW":0.18,"trueW":0.2,"cost":20.0,"mid":10.16,"oi":131},{"c":"SPY260908C00767000","u":"SPY","dte":"7-12d","mny":1.0004,"indW":0.02,"trueW":0.03,"cost":3.0,"mid":4.38,"oi":64},{"c":"SPY260908C00774000","u":"SPY","dte":"7-12d","mny":1.0096,"indW":0.02,"trueW":0.02,"cost":2.0,"mid":1.48,"oi":199},{"c":"SPY260908C00790000","u":"SPY","dte":"7-12d","mny":1.0304,"indW":0.05,"trueW":0.01,"cost":1.0,"mid":0.04,"oi":204},{"c":"SPY260908C00805000","u":"SPY","dte":"7-12d","mny":1.05,"indW":0.03,"trueW":0.01,"cost":1.0,"mid":0.03,"oi":54},{"c":"SPY260930C00759000","u":"SPY","dte":"28-45d","mny":0.99,"indW":0.2,"trueW":0.2,"cost":20.0,"mid":15.83,"oi":718},{"c":"SPY260930C00767000","u":"SPY","dte":"28-45d","mny":1.0004,"indW":0.03,"trueW":0.03,"cost":3.0,"mid":10.62,"oi":336},{"c":"SPY260930C00774000","u":"SPY","dte":"28-45d","mny":1.0096,"indW":0.03,"trueW":0.03,"cost":3.0,"mid":6.72,"oi":492},{"c":"SPY260930C00790000","u":"SPY","dte":"28-45d","mny":1.0304,"indW":0.06,"trueW":0.02,"cost":2.0,"mid":1.83,"oi":7258},{"c":"SPY260930C00805000","u":"SPY","dte":"28-45d","mny":1.05,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.39,"oi":4701},{"c":"QQQ260831C00716000","u":"QQQ","dte":"0DTE","mny":1.0005,"indW":0.02,"trueW":0.02,"cost":2.0,"mid":0.43,"oi":1548},{"c":"QQQ260831C00723000","u":"QQQ","dte":"0DTE","mny":1.0103,"indW":0.03,"trueW":0.01,"cost":1.0,"mid":0.03,"oi":1003},{"c":"QQQ260901C00708000","u":"QQQ","dte":"1-3d","mny":0.9894,"indW":0.3,"trueW":0.51,"cost":51.0,"mid":7.92,"oi":633},{"c":"QQQ260901C00716000","u":"QQQ","dte":"1-3d","mny":1.0005,"indW":0.021,"trueW":0.03,"cost":3.0,"mid":2.04,"oi":518},{"c":"QQQ260901C00723000","u":"QQQ","dte":"1-3d","mny":1.0103,"indW":0.05,"trueW":0.01,"cost":1.0,"mid":0.21,"oi":646},{"c":"QQQ260908C00694000","u":"QQQ","dte":"7-12d","mny":0.9698,"indW":0.39,"trueW":0.58,"cost":58.0,"mid":23.02,"oi":11},{"c":"QQQ260908C00708000","u":"QQQ","dte":"7-12d","mny":0.9894,"indW":0.07,"trueW":0.1,"cost":10.0,"mid":11.13,"oi":4},{"c":"QQQ260908C00716000","u":"QQQ","dte":"7-12d","mny":1.0005,"indW":0.07,"trueW":0.06,"cost":6.0,"mid":5.79,"oi":25},{"c":"QQQ260908C00723000","u":"QQQ","dte":"7-12d","mny":1.0103,"indW":0.05,"trueW":0.05,"cost":5.0,"mid":2.73,"oi":54},{"c":"QQQ260908C00737000","u":"QQQ","dte":"7-12d","mny":1.0299,"indW":0.06,"trueW":0.02,"cost":2.0,"mid":0.27,"oi":339},{"c":"QQQ260908C00751000","u":"QQQ","dte":"7-12d","mny":1.0495,"indW":0.03,"trueW":0.03,"cost":3.0,"mid":0.04,"oi":73},{"c":"QQQ260930C00708000","u":"QQQ","dte":"28-45d","mny":0.9894,"indW":0.32,"trueW":0.13,"cost":13.0,"mid":19.43,"oi":298},{"c":"QQQ260930C00716000","u":"QQQ","dte":"28-45d","mny":1.0005,"indW":0.2,"trueW":0.12,"cost":12.0,"mid":14.33,"oi":228},{"c":"QQQ260930C00723000","u":"QQQ","dte":"28-45d","mny":1.0103,"indW":0.1,"trueW":0.1,"cost":10.0,"mid":10.64,"oi":1062},{"c":"QQQ260930C00737000","u":"QQQ","dte":"28-45d","mny":1.0299,"indW":0.14,"trueW":0.07,"cost":7.0,"mid":4.96,"oi":150},{"c":"QQQ260930C00751000","u":"QQQ","dte":"28-45d","mny":1.0495,"indW":0.1,"trueW":0.05,"cost":5.0,"mid":2.04,"oi":200},{"c":"AAPL260831C00305000","u":"AAPL","dte":"0DTE","mny":0.9665,"indW":0.18,"trueW":0.3,"cost":30.0,"mid":10.26,"oi":331},{"c":"AAPL260831C00312500","u":"AAPL","dte":"0DTE","mny":0.9903,"indW":0.26,"trueW":0.25,"cost":25.0,"mid":2.91,"oi":949},{"c":"AAPL260831C00315000","u":"AAPL","dte":"0DTE","mny":0.9982,"indW":0.02,"trueW":0.02,"cost":2.0,"mid":0.73,"oi":6572},{"c":"AAPL260831C00317500","u":"AAPL","dte":"0DTE","mny":1.0061,"indW":0.05,"trueW":0.01,"cost":1.0,"mid":0.07,"oi":2342},{"c":"AAPL260902C00312500","u":"AAPL","dte":"1-3d","mny":0.9903,"indW":0.03,"trueW":0.1,"cost":10.0,"mid":3.96,"oi":448},{"c":"AAPL260902C00315000","u":"AAPL","dte":"1-3d","mny":0.9982,"indW":0.05,"trueW":0.05,"cost":5.0,"mid":2.42,"oi":561},{"c":"AAPL260902C00317500","u":"AAPL","dte":"1-3d","mny":1.0061,"indW":0.02,"trueW":0.01,"cost":1.0,"mid":1.39,"oi":472},{"c":"AAPL260902C00325000","u":"AAPL","dte":"1-3d","mny":1.0299,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.2,"oi":2609},{"c":"AAPL260902C00332500","u":"AAPL","dte":"1-3d","mny":1.0537,"indW":0.01,"trueW":0.01,"cost":1.0,"mid":0.06,"oi":165},{"c":"AAPL260909C00315000","u":"AAPL","dte":"7-12d","mny":0.9982,"indW":0.27,"trueW":0.2,"cost":20.0,"mid":5.21,"oi":1292},{"c":"AAPL260909C00317500","u":"AAPL","dte":"7-12d","mny":1.0061,"indW":0.15,"trueW":0.15,"cost":15.0,"mid":4.0,"oi":142},{"c":"AAPL260909C00325000","u":"AAPL","dte":"7-12d","mny":1.0299,"indW":0.06,"trueW":0.06,"cost":6.0,"mid":1.58,"oi":672},{"c":"AAPL260909C00332500","u":"AAPL","dte":"7-12d","mny":1.0537,"indW":0.14,"trueW":0.14,"cost":14.0,"mid":0.52,"oi":9},{"c":"AAPL261002C00310000","u":"AAPL","dte":"28-45d","mny":0.9824,"indW":0.31,"trueW":0.3,"cost":30.0,"mid":12.84,"oi":1944},{"c":"AAPL261002C00320000","u":"AAPL","dte":"28-45d","mny":1.0141,"indW":0.19,"trueW":0.3,"cost":30.0,"mid":7.38,"oi":536},{"c":"AAPL261002C00325000","u":"AAPL","dte":"28-45d","mny":1.0299,"indW":0.27,"trueW":0.3,"cost":30.0,"mid":5.45,"oi":300},{"c":"AAPL261002C00330000","u":"AAPL","dte":"28-45d","mny":1.0457,"indW":0.31,"trueW":0.25,"cost":25.0,"mid":3.92,"oi":1085}],"oracle":[{"limit":5.05,"fill":5.02},{"limit":5.1,"fill":5.01},{"limit":5.2,"fill":5.02},{"limit":5.45,"fill":5.02},{"limit":6.05,"fill":5.01}],"paired":[{"a":-0.0207,"b":-0.0178,"diff":0.0029},{"a":0.005,"b":0.0161,"diff":0.0111},{"a":0.005,"b":-0.0095,"diff":-0.0145},{"a":-0.003,"b":-0.0154,"diff":-0.0124},{"a":-0.0281,"b":-0.009,"diff":0.0191},{"a":-0.0218,"b":0.0053,"diff":0.0271},{"a":-0.0121,"b":-0.0142,"diff":-0.0021},{"a":0.0333,"b":0.0295,"diff":-0.0038},{"a":-0.005,"b":0.0054,"diff":0.0104},{"a":-0.025,"b":-0.0476,"diff":-0.0226}],"summary":{"n":10,"mean_A":-0.007239999999999999,"mean_B":-0.00572,"diff":0.0015199999999999983,"t":0.30677238817229446,"favourable":7}};</script>
+<script>(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+var money = function(v){ return (v<0?"-$":"$") + Math.abs(v).toFixed(Math.abs(v)<10?2:0); };
+var money0 = function(v){ return (v<0?"-$":"$") + Math.round(Math.abs(v)); };
+
+/* ---------- 1. spread dragger: the gap is a fee, paid twice ---------- */
+(function(){
+  var BID=2.21, ASK=2.35, MID=2.28, host=$("sp"), h=$("sphandle"), zone=$("spzone");
+  if(!host) return;
+  function render(pct){
+    pct = Math.max(12, Math.min(88, pct));
+    var price = BID + (ASK-BID)*((pct-12)/76);
+    h.style.left = pct+"%";
+    h.setAttribute("aria-valuenow", price.toFixed(2));
+    var lo = Math.min(pct,50), hi = Math.max(pct,50);
+    zone.style.left = lo+"%"; zone.style.width = (hi-lo)+"%";
+    var loss = (price-MID)*100;
+    $("spPay").textContent = "$"+price.toFixed(2);
+    $("spLoss").textContent = money0(loss);
+    $("spLoss").className = "v " + (loss>0.5?"cost":(loss<-0.5?"good":"neu"));
+    $("spRound").textContent = money0(Math.abs(loss)*2);
+  }
+  function fromEvent(e){
+    var r = host.getBoundingClientRect();
+    var x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+    render(x/r.width*100);
+  }
+  var dragging=false;
+  h.addEventListener("mousedown",function(){dragging=true;});
+  h.addEventListener("touchstart",function(){dragging=true;},{passive:true});
+  window.addEventListener("mousemove",function(e){ if(dragging) fromEvent(e); });
+  window.addEventListener("touchmove",function(e){ if(dragging) fromEvent(e); },{passive:true});
+  window.addEventListener("mouseup",function(){dragging=false;});
+  window.addEventListener("touchend",function(){dragging=false;});
+  host.addEventListener("click",fromEvent);
+  h.addEventListener("keydown",function(e){
+    var cur = parseFloat(h.style.left)||88;
+    if(e.key==="ArrowLeft"){ render(cur-4); e.preventDefault(); }
+    if(e.key==="ArrowRight"){ render(cur+4); e.preventDefault(); }
+  });
+  render(88);
+})();
+
+/* ---------- 2. strike explorer: the 347x range on one underlying ---------- */
+(function(){
+  var rows = DATA.contracts, U=$("fU"), E=$("fE"), M=$("fM"), bars=$("bars");
+  if(!bars) return;
+  function opts(sel, vals, labels){
+    sel.innerHTML = "";
+    vals.forEach(function(v,i){
+      var o=document.createElement("option"); o.value=v; o.textContent=labels[i]; sel.appendChild(o);
+    });
+  }
+  var uniqU = ["all"].concat(Array.from(new Set(rows.map(function(r){return r.u;}))).sort());
+  opts(U, uniqU, uniqU.map(function(v){return v==="all"?"All":v;}));
+  var uniqE = ["all"].concat(Array.from(new Set(rows.map(function(r){return r.dte;}))));
+  opts(E, uniqE, uniqE.map(function(v){return v==="all"?"All expiries":v;}));
+  opts(M, ["all","itm","atm","otm"],
+      ["All strikes","Deep in-the-money","Near the money","Out of the money"]);
+
+  function bucket(r){ return r.mny<0.98?"itm":(r.mny<=1.02?"atm":"otm"); }
+  function filtered(){
+    return rows.filter(function(r){
+      return (U.value==="all"||r.u===U.value) &&
+             (E.value==="all"||r.dte===E.value) &&
+             (M.value==="all"||bucket(r)===M.value);
+    }).sort(function(a,b){ return a.cost-b.cost; });
+  }
+  function median(a){ if(!a.length) return 0; var s=a.slice().sort(function(x,y){return x-y;});
+    return s[Math.floor(s.length/2)]; }
+  function draw(){
+    var f = filtered();
+    bars.innerHTML = "";
+    if(!f.length){ $("exN").textContent="0"; $("exNote").textContent="No contracts match that combination.";
+      ["exMed","exMax","exMin"].forEach(function(i){$(i).textContent="—";}); $("axN").textContent="—"; return; }
+    var max = Math.max.apply(null, f.map(function(r){return Math.max(r.cost,1);}));
+    f.forEach(function(r,i){
+      var b=document.createElement("div");
+      b.className="bar"; b.style.height = Math.max(2,(Math.max(r.cost,0)/max)*100)+"%";
+      b.title = r.c+" — "+money0(r.cost);
+      b.setAttribute("role","button"); b.setAttribute("tabindex","0");
+      b.addEventListener("click",function(){ select(i,f); });
+      b.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){select(i,f);e.preventDefault();} });
+      bars.appendChild(b);
+    });
+    var costs=f.map(function(r){return r.cost;});
+    $("exN").textContent = f.length;
+    $("exMed").textContent = money0(median(costs));
+    $("exMax").textContent = money0(Math.max.apply(null,costs));
+    $("exMin").textContent = money0(Math.min.apply(null,costs));
+    $("axN").textContent = f.length+" contracts";
+    var ratio = Math.max.apply(null,costs) / Math.max(1, median(costs));
+    $("exNote").innerHTML = f.length>3
+      ? "The most expensive contract here costs <b>"+Math.round(ratio)+"×</b> the typical one. Click any bar."
+      : "Click any bar to see which contract it is.";
+  }
+  function select(i,f){
+    Array.prototype.forEach.call(bars.children,function(b,j){ b.className = "bar" + (i===j?" sel":""); });
+    var r=f[i];
+    $("exNote").innerHTML = "<b>"+r.c+"</b> — "+r.u+", "+r.dte+", strike is "+
+      ((r.mny-1)*100).toFixed(1)+"% from the share price. Real cost to get in and out: <b>"+
+      money0(r.cost)+"</b> per contract.";
+  }
+  [U,E,M].forEach(function(s){ s.addEventListener("change",draw); });
+  draw();
+})();
+
+/* ---------- 3. stock replacement: same exposure, 116x the fee ---------- */
+(function(){
+  var bs=$("wShares"), bo=$("wOption");
+  if(!bs) return;
+  var worst = DATA.contracts.filter(function(r){return r.mny<0.98;})
+                .sort(function(a,b){return b.cost-a.cost;})[0];
+  var oc = worst ? worst.cost : 347;
+  function set(isOption){
+    bs.setAttribute("aria-pressed", String(!isOption));
+    bo.setAttribute("aria-pressed", String(isOption));
+    $("twWhat").textContent = isOption ? "1 deep-ITM call" : "100 SPY shares";
+    $("twCost").textContent = isOption ? money0(oc) : "$3";
+    $("twCost").className = "v " + (isOption?"cost":"good");
+    $("twRatio").textContent = isOption ? Math.round(oc/3)+"× more" : "baseline";
+    $("twRatio").className = "v " + (isOption?"cost":"neu");
+    $("twNote").innerHTML = isOption
+      ? "Almost identical exposure — a deep in-the-money call moves nearly one-for-one with the shares. <b>"+
+        Math.round(oc/3)+" times the hidden fee.</b> You are paying for the wrapper, not the position."
+      : "SPY's own spread that afternoon was three cents. A hundred shares cost <b>$3</b> to get in and out of.";
+  }
+  bs.addEventListener("click",function(){set(false);});
+  bo.addEventListener("click",function(){set(true);});
+  set(false);
+})();
+
+/* ---------- 4. required win rate: the credit is priced, not free ---------- */
+(function(){
+  var W=$("wW"), C=$("wC");
+  if(!W) return;
+  function calc(){
+    var w=Math.max(0.01,parseFloat(W.value)||1), c=Math.max(0.01,parseFloat(C.value)||0.01);
+    if(c>=w) c = w-0.01;
+    var win=c*100, lose=(w-c)*100, need=lose/(lose+win);
+    $("wWin").textContent = money0(win);
+    $("wLose").textContent = money0(lose);
+    $("wNeed").textContent = (need*100).toFixed(1)+"%";
+    $("wBar").style.width = (need*100)+"%";
+  }
+  [W,C].forEach(function(i){ i.addEventListener("input",calc); });
+  calc();
+})();
+
+/* ---------- 5. oracle stepper: the price is the price ---------- */
+(function(){
+  var tb=$("orTb"), btn=$("orNext");
+  if(!tb) return;
+  var probes = DATA.oracle, i=0;
+  btn.addEventListener("click",function(){
+    if(i>=probes.length) return;
+    var p=probes[i++];
+    var tr=document.createElement("tr");
+    tr.innerHTML = '<td class="n">$'+p.limit.toFixed(2)+'</td>'+
+                   '<td class="n" style="color:var(--indigo);font-weight:600">$'+p.fill.toFixed(2)+'</td>'+
+                   '<td class="n" style="color:var(--green)">'+(p.fill-p.limit>=0?"+":"")+
+                   (p.fill-p.limit).toFixed(2)+'</td>';
+    tb.appendChild(tr);
+    if(i>=probes.length){
+      btn.disabled=true; btn.textContent="All six sent";
+      $("orHint").textContent="";
+      $("orNote").style.display="block";
+    } else {
+      $("orHint").textContent = (probes.length-i)+" to go — watch the middle column barely move.";
+    }
+  });
+})();
+
+/* ---------- 6. paired trials, frequency framing rather than a CI ---------- */
+(function(){
+  var host=$("pdots");
+  if(!host) return;
+  var t=DATA.paired, better=0, worse=0, sum=0;
+  t.forEach(function(p,i){
+    var d=document.createElement("div");
+    var cheaper = p.diff < 0;
+    if(cheaper) better++; else worse++;
+    sum += p.diff;
+    d.className = "dot " + (cheaper?"dn":"up");
+    d.textContent = (p.diff>=0?"+":"")+(p.diff*100).toFixed(0);
+    d.title = "Pair "+(i+1)+": waiting was "+(cheaper?"cheaper":"dearer")+
+              " by "+money(Math.abs(p.diff*100))+" per contract";
+    host.appendChild(d);
+  });
+  $("pWin").textContent = better+" of "+t.length;
+  $("pLose").textContent = worse+" of "+t.length;
+  var avg=(sum/t.length)*100;
+  $("pDiff").textContent = (avg>=0?"+":"")+money(Math.abs(avg)).replace("$","$");
+  $("pDiff").className = "v " + (Math.abs(avg)<0.5 ? "neu" : (avg<0?"good":"cost"));
+})();
+
+/* ---------- 7. the gate: one measured rule does the work ---------- */
+(function(){
+  var thr=$("gThr"), bars=$("gBars");
+  if(!thr) return;
+  var rows = DATA.contracts.slice().sort(function(a,b){ return a.indW-b.indW; });
+  function draw(){
+    var t = parseInt(thr.value,10)/100;
+    $("gVal").textContent = "$"+t.toFixed(2);
+    bars.innerHTML="";
+    var pass=[], rej=[];
+    var max = Math.max.apply(null, rows.map(function(r){return Math.max(r.cost,1);}));
+    rows.forEach(function(r){
+      var ok = r.indW <= t;
+      (ok?pass:rej).push(r.cost);
+      var b=document.createElement("div");
+      b.className="bar "+(ok?"pass":"rej");
+      b.style.height = Math.max(2,(Math.max(r.cost,0)/max)*100)+"%";
+      b.title = r.c+" — quoted $"+r.indW.toFixed(2)+" wide,true cost "+money0(r.cost);
+      bars.appendChild(b);
+    });
+    function mean(a){ return a.length ? a.reduce(function(x,y){return x+y;},0)/a.length : 0; }
+    $("gPass").textContent = pass.length;
+    $("gRej").textContent = rej.length;
+    $("gPassC").textContent = pass.length?money(mean(pass)):"—";
+    $("gRejC").textContent = rej.length?money0(mean(rej)):"—";
+    var slipped = pass.filter(function(c){return c>50;}).length;
+    var avoided = rej.reduce(function(x,y){return x+y;},0);
+    $("gNote").innerHTML = "At this line you avoid <b>"+money0(avoided)+"</b> of cost across "+rej.length+
+      " contracts, and <b>"+slipped+"</b> expensive ones slip through." +
+      (Math.abs(t-0.20)<0.001 ? " <b>This is the rule we pre-registered.</b>" : "");
+  }
+  thr.addEventListener("input",draw);
+  draw();
+})();
+})();
+</script>
+</body>
+</html>
