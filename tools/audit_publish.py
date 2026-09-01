@@ -20,6 +20,25 @@ commit times GitHub recorded. It does NOT prove we published everything -- an op
 could always withhold. We say so rather than overclaiming: this is tamper-EVIDENT, not
 tamper-proof, and the distinction is the honest one.
 
+PERFORMANCE TIERS
+-----------------
+GIPS is explicit that theoretical performance -- "model, backtested, hypothetical,
+simulated, indicative, ex ante, and forward-looking" -- must be clearly labelled and
+must NOT be linked with actual performance. The SEC Marketing Rule adds that hypothetical
+results require "sufficient information to enable the audience to understand the criteria
+used and the assumptions made".
+
+Applied honestly, that catches more than our dry runs. PAPER TRADING IS ALSO A SIMULATION.
+Under GIPS every number this project produces is theoretical -- so the log separates:
+
+    simulated  dry run; no order ever left the machine
+    paper      a real order, filled against the real NBBO, with simulated money
+    live       real money -- we never do this
+
+and never blends them into one figure. The tier is DERIVED from each record rather than
+stored inside the hashed payload, so anyone can recompute it and nobody can quietly
+relabel a dry run as a trade.
+
 ISOLATION
 ---------
 This runs as a separate process from the agent and only ever READS the journals. A
@@ -76,6 +95,37 @@ def existing_chain():
     return rows, head, seen
 
 
+MODES = ("simulated", "paper", "live")
+
+
+def mode_of(payload, kind=None):
+    """Derived, never stored in the hashed payload -- so it is independently checkable.
+
+    Risk-kernel records are EVALUATIONS, not trades. A refusal is the absence of a
+    trade, so it belongs to no performance tier at all; filing it under one would
+    imply an order that never existed.
+    """
+    if kind == "risk" or "proposed_contracts" in payload:
+        return "evaluation"
+    d = payload.get("dry_run")
+    if d is True:
+        return "simulated"
+    if d is False:
+        return "paper"          # a real order against the real NBBO, with simulated money
+    return "unclassified"
+
+
+def prov(payload, kind):
+    """W3C PROV shape: who acted, what they did, and on what."""
+    if kind == "risk":
+        return {"agent": "risk_kernel",
+                "activity": payload.get("decision", "evaluate"),
+                "entity": payload.get("strategy", "proposal")}
+    return {"agent": "agent",
+            "activity": payload.get("event", "?"),
+            "entity": payload.get("coid") or payload.get("short") or payload.get("underlying", "-")}
+
+
 def fingerprint(rec):
     """Identity of a source record, so republishing cannot duplicate it."""
     return hashlib.sha256(json.dumps(rec, sort_keys=True, default=str).encode()).hexdigest()[:24]
@@ -104,46 +154,103 @@ def summarise(r):
 
 
 def build_digest(rows):
-    total = len(rows)
-    refusals = [r for r in rows if r["payload"].get("decision") == "REJECT"]
-    opens = [r for r in rows if r["payload"].get("event") == "opened"]
-    closes = [r for r in rows if r["payload"].get("event") == "closed"]
-    gates = {}
-    for r in refusals:
-        g = r["payload"].get("gate") or "?"
-        gates[g] = gates.get(g, 0) + 1
+    """Counts are reported PER TIER and never blended -- GIPS forbids linking theoretical
+    performance with actual, and the same discipline applies within theoretical too."""
+    by = {m: [] for m in list(MODES) + ["unclassified"]}
+    for r in rows:
+        by.setdefault(r.get("mode") or mode_of(r["payload"]), []).append(r)
+
+    def count(bucket, pred):
+        return sum(1 for r in bucket if pred(r["payload"]))
 
     L = []
     L.append("# Decision log\n")
     L.append("Every decision this agent made, published as it ran. Refusals included — "
              "especially refusals.\n")
-    L.append("| | |\n|---|---|")
-    L.append("| Records | **%d** |" % total)
-    L.append("| Orders opened | **%d** |" % len(opens))
-    L.append("| Positions closed | **%d** |" % len(closes))
-    L.append("| Trades refused by the risk kernel | **%d** |" % len(refusals))
-    L.append("| Chain head | `%s` |" % (rows[-1]["hash"][:16] if rows else "—"))
-    L.append("| Last updated | %s ET |\n" % _et().strftime("%Y-%m-%d %H:%M:%S"))
+    L.append("> **All performance shown here is theoretical.** Paper trading is a "
+             "simulation: orders are filled against real quotes, but with simulated money "
+             "and without ever reaching an exchange. GIPS requires theoretical performance "
+             "to be labelled as such and never linked with actual performance, so the tiers "
+             "below are reported separately and are never combined into a single figure. "
+             "**No real money has been traded at any point.**\n")
 
+    L.append("## Activity by tier\n")
+    L.append("| Tier | What it means | Records | Orders opened | Positions closed | Refused |")
+    L.append("|---|---|---|---|---|---|")
+    labels = {
+        "simulated": "dry run — no order left the machine",
+        "paper": "real order, real quote, simulated money",
+        "live": "real money — never used",
+        "evaluation": "risk-kernel decision; no order implied",
+        "unclassified": "tier could not be derived",
+    }
+    for m in ["paper", "simulated", "live", "evaluation", "unclassified"]:
+        b = by.get(m) or []
+        if not b and m in ("live", "unclassified"):
+            continue
+        opened = count(b, lambda p: p.get("event") == "opened")
+        closed = count(b, lambda p: p.get("event") == "closed")
+        # refusals are counted from the kernel's own records only; the agent journals
+        # the same decision and counting both would double every one
+        refused = count(b, lambda p: p.get("decision") == "REJECT") if m == "evaluation" else 0
+        L.append("| **%s** | %s | %d | %s | %s | %s |" % (
+            m, labels[m], len(b),
+            opened if m in ("paper", "simulated", "live") else "—",
+            closed if m in ("paper", "simulated", "live") else "—",
+            refused if m == "evaluation" else "—"))
+    L.append("")
+    L.append("Refusals are counted from the risk kernel's own records only. The agent "
+             "journals the same decision from its side, and counting both would double "
+             "every one.\n")
+
+    gates = {}
+    for r in rows:
+        if r["kind"] == "risk" and r["payload"].get("decision") == "REJECT":
+            g = r["payload"].get("gate") or "?"
+            gates[g] = gates.get(g, 0) + 1
     if gates:
-        L.append("## Which gates fired\n")
+        L.append("## Which gates refused a trade\n")
         L.append("| Gate | Refusals |\n|---|---|")
         for g, n in sorted(gates.items(), key=lambda kv: -kv[1]):
             L.append("| `%s` | %d |" % (g, n))
         L.append("")
 
+    L.append("## Criteria and assumptions\n")
+    L.append("The SEC Marketing Rule requires that hypothetical results carry enough "
+             "detail for a reader to understand how they were produced. Ours:\n")
+    L.append("- **Strategy** — defined-risk vertical spreads on SPY, 0–2 days to expiry, "
+             "entered only while the volatility term structure is in contango, closed at "
+             "50% of credit captured or by 15:15 ET, flat overnight without exception.")
+    L.append("- **Sizing** — 0.25% of equity at risk per trade, 1.5% aggregate, halting at "
+             "a 2.5% drawdown from the strategy's starting equity. Frozen in "
+             "`config/risk.json` before the first trade.")
+    L.append("- **Fills** — simulated by Alpaca against the real national best bid and "
+             "offer. Order size is not checked against available quantity, so fills may be "
+             "more favourable than a live market would allow.")
+    L.append("- **Costs** — no commissions or fees are modelled; Alpaca does not charge "
+             "them on paper accounts. The bid-ask spread *is* paid and is measured.")
+    L.append("- **What this cannot show** — slippage under stress, partial-fill behaviour "
+             "at size, assignment mechanics, or any effect of the orders on the market.\n")
+
     L.append("## How to verify this\n")
     L.append("Each record carries the SHA-256 of the record before it, so editing any "
              "earlier entry breaks every hash after it. The commit timestamps are "
-             "GitHub's, not ours.\n")
-    L.append("```\npython3 tools/audit_publish.py --verify\n```\n")
+             "GitHub's, not ours. The tier is derived from each record rather than stored "
+             "in the hashed payload, so it can be recomputed independently.\n")
+    L.append("```\ngit clone https://github.com/sahuongithub/midpoint\n"
+             "python3 tools/audit_publish.py --verify\n```\n")
     L.append("This is **tamper-evident, not tamper-proof**. It shows the sequence has not "
              "been silently altered. It cannot show that nothing was withheld — no "
              "self-published log can, and claiming otherwise would be dishonest.\n")
+    L.append("| | |\n|---|---|")
+    L.append("| Total records | %d |" % len(rows))
+    L.append("| Chain head | `%s` |" % (rows[-1]["hash"][:16] if rows else "—"))
+    L.append("| Last updated | %s ET |\n" % _et().strftime("%Y-%m-%d %H:%M:%S"))
 
     L.append("## Most recent 40 decisions\n")
     for r in rows[-40:][::-1]:
-        L.append("- " + summarise(dict(r["payload"], _kind=r["kind"])))
+        m = r.get("mode") or mode_of(r["payload"], r["kind"])
+        L.append("- `[%s]` %s" % (m, summarise(dict(r["payload"], _kind=r["kind"]))))
     return "\n".join(L) + "\n"
 
 
@@ -194,7 +301,8 @@ def publish(push=True, quiet=False):
             payload = {k: v for k, v in rec.items() if k != "_kind"}
             head = link(head, payload)
             row = {"seq": len(rows) + 1, "ts": ts, "kind": kind,
-                   "fingerprint": fp, "payload": payload, "hash": head}
+                   "fingerprint": fp, "payload": payload, "hash": head,
+                   "mode": mode_of(payload, kind), "prov": prov(payload, kind)}
             rows.append(row)
             f.write(json.dumps(row, default=str) + "\n")
             f.flush(); os.fsync(f.fileno())

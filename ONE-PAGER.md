@@ -47,6 +47,8 @@ Two pieces of quant infrastructure exist only because the platform forces them. 
 
 **That a few sessions of P&L means anything.** A Sharpe of 0.8 produces about **+0.1%** over five sessions against a standard deviation near **0.9%** — signal-to-noise ≈ **0.11**. We pre-registered that prediction rather than discovering it afterwards.
 
+**And we label our own results the way the standards require.** GIPS holds that theoretical performance — model, backtested, hypothetical, **simulated** — must be labelled as such and never linked with actual performance. Applied honestly that catches more than our dry runs: **paper trading is itself a simulation**, so every figure this project produces is theoretical. The public decision log separates dry runs from paper orders from live money and never blends them into one number. No real money has been traded at any point.
+
 We also published a finding and withdrew it: quoted ask size looked like the second-best predictor of true spread at n=17 (ρ = −0.897) and did not survive n=48 (ρ = −0.324). **The retraction is still on the page.**
 
 *Paper trading only. Simulated results are hypothetical. Options involve substantial risk and are not suitable for all investors.*
