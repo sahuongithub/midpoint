@@ -22,6 +22,7 @@ run "risk kernel, unit"          test_risk_kernel.py
 run "risk kernel, 10k random"    test_kernel_properties.py 10000
 run "refusal pricing"            test_opportunity_cost.py
 run "assignment-risk monitor"    test_assignment_risk.py
+run "agent cycle sequencing"     test_agent_cycle.py
 echo "----------------------------------------------------------------------"
 echo "  analyses recomputed from the recorded data (no network):"
 run "microprice vs mid"          microprice_study.py

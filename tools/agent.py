@@ -277,22 +277,30 @@ class Agent:
                 self._journal("flatten", reason="past %s ET" % self.cfg.flatten_by_et,
                               n_positions=len(positions))
                 self.exec.flatten_all()
+            if self.s["open_structures"]:
+                self.s["open_structures"] = []      # we just closed them; do not
+                self._save_state()                  # report them missing next cycle
             return "flattened"
+
+        # Manage what is open BEFORE anything else can return early. Standing down
+        # is a decision not to OPEN; it is not a decision to stop looking after
+        # what is already on. An earlier version returned here on a bad regime and
+        # would have held a position straight through its profit target.
+        if self.s["open_structures"]:
+            n = self.manage_positions(positions)
+            if n:
+                st = self.exec.reconcile(); positions = st["positions"]
 
         regime = sig.read_regime()
         if not regime.short_premium_ok:
             self._journal("stand_down", reason=regime.explain(), ratio=regime.ratio)
             return "stand_down"
 
-        # manage what is open BEFORE looking for anything new: capital freed by a
-        # close is immediately available, and a full book should not block itself.
-        if self.s["open_structures"]:
-            n = self.manage_positions(positions)
-            if n:
-                st = self.exec.reconcile(); positions = st["positions"]
-
-        if len(positions) >= self.cfg.max_concurrent:
-            self._journal("at_capacity", n_positions=len(positions))
+        # Count STRUCTURES, not legs. A vertical is two positions, so counting legs
+        # made a limit of three concurrent spreads bind after the second one.
+        n_open = len(self.s["open_structures"])
+        if n_open >= self.cfg.max_concurrent:
+            self._journal("at_capacity", n_structures=n_open, n_legs=len(positions))
             return "at_capacity"
 
         lo, hi = self.cfg.open_window_et

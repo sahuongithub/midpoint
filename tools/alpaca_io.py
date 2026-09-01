@@ -92,6 +92,46 @@ def guard_not_competition():
     return a
 
 
+def flatten_symbol(symbol, coid_prefix=None, verbose=True):
+    """Close one symbol's position and cancel only orders we recognise as ours.
+
+    flatten_all() is correct for an agent that owns the whole account, and wrong
+    for anything that shares it: a research probe calling it would close positions
+    an agent is still managing. Experiments that run alongside the agent clean up
+    after themselves with this instead, which touches one symbol and, if given a
+    client_order_id prefix, only the orders carrying it.
+    """
+    result = {"orders_cancelled": 0, "positions_closed": 0, "symbol": symbol}
+    for o in req("GET", "%s/v2/orders" % TRADING, params={"status": "open"}):
+        if o.get("symbol") != symbol:
+            continue
+        if coid_prefix and not (o.get("client_order_id") or "").startswith(coid_prefix):
+            continue
+        try:
+            req("DELETE", "%s/v2/orders/%s" % (TRADING, o["id"]))
+            result["orders_cancelled"] += 1
+        except Exception:
+            pass
+    time.sleep(1.0)
+    for p in req("GET", "%s/v2/positions" % TRADING):
+        if p.get("symbol") != symbol:
+            continue
+        try:
+            req("DELETE", "%s/v2/positions/%s" % (TRADING, urllib.parse.quote(p["symbol"])))
+            result["positions_closed"] += 1
+        except Exception:
+            pass
+    time.sleep(1.5)
+    left = [p for p in req("GET", "%s/v2/positions" % TRADING) if p.get("symbol") == symbol]
+    result["positions_left"] = len(left)
+    result["clean"] = result["positions_left"] == 0
+    if verbose:
+        print("[flatten %s] cancelled %d, closed %d -> %s"
+              % (symbol, result["orders_cancelled"], result["positions_closed"],
+                 "CLEAN" if result["clean"] else "STILL HOLDING %d" % result["positions_left"]))
+    return result
+
+
 def flatten_all(verbose=True):
     """Cancel every open order, then close every position, then VERIFY both are zero.
 

@@ -273,10 +273,14 @@ def main(argv):
                      (bfill - pre["ask"]) if bfill else float("nan"), sfill, rt, spent))
             time.sleep(1.0)
 
-    print("\n  flattening and verifying")
-    aio.flatten_all()
-    pos = aio.req("GET", "%s/v2/positions" % aio.TRADING)
-    print("  open positions after run: %d" % len(pos))
+    # clean up ONLY what this experiment opened. The lab account may be running the
+    # agent at the same time, and a blanket flatten would close positions it is
+    # still managing -- turning a research probe into an intervention.
+    print("\n  flattening this experiment's own contract and verifying")
+    aio.flatten_symbol(c["symbol"], coid_prefix="mp-ladder-")
+    pos = [p for p in aio.req("GET", "%s/v2/positions" % aio.TRADING)
+           if p.get("symbol") == c["symbol"]]
+    print("  open positions in %s after run: %d" % (c["symbol"], len(pos)))
     print("  total spent: $%.2f" % spent)
 
     if rows:
