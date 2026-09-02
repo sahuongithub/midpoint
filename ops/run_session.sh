@@ -41,19 +41,61 @@ mkdir -p "$ROOT/ops/run"
 [ -n "${EXPECT:-}" ] && echo "$AGENT_PID" > "$ROOT/ops/run/agent.$EXPECT.pid"
 wait $AGENT_PID
 RC=$?
+export SESSION_RC="$RC"
 echo "[$STAMP] session exited $RC" >> "$LOG/cron.log"
 
-# whatever happened, do not leave the account holding something overnight
+# Whatever happened, do not leave the account holding something overnight -- and
+# write down what that cost. The exit is a trade like any other: it crosses the
+# spread, it moves the equity curve, and a project whose subject is the true cost of
+# execution cannot be the one place where a fill goes unrecorded. Before today this
+# block flattened silently, the agent's journal showed only "structure_gone", and the
+# P&L attribution had no way to tell a supervised exit from a position that expired.
 echo "[$STAMP] verifying flat" >> "$LOG/cron.log"
 /usr/bin/python3 - <<'PY' >> "$LOG/cron.log" 2>&1
-import os, sys
+import os, sys, json, datetime
 sys.path.insert(0, os.path.expanduser("~/midpoint/tools"))
 import alpaca_io as aio
+
+acct = os.environ.get("MIDPOINT_ALLOWED_ACCOUNT")
+stem = "agent.%s" % acct if acct else "agent"
+JOURNAL = os.path.expanduser("~/midpoint/docs/%s.jsonl" % stem)
+
+def journal(event, **kw):
+    now = datetime.datetime.now(datetime.timezone.utc)
+    rec = {"ts": now.isoformat(), "event": event, "by": "run_session.sh"}
+    rec.update(kw)
+    with open(JOURNAL, "a") as fh:
+        fh.write(json.dumps(rec, sort_keys=True) + "\n")
+
 pos = aio.req("GET", "%s/v2/positions" % aio.TRADING)
 orders = aio.req("GET", "%s/v2/orders" % aio.TRADING, params={"status": "open"})
 print("  after session: %d positions, %d resting orders" % (len(pos), len(orders)))
-if pos or orders:
+if not (pos or orders):
+    journal("session_flat", positions=0, resting=0)
+else:
     print("  not flat -- flattening")
-    print("  ", aio.flatten_all(verbose=False))
+    held = [{"symbol": p["symbol"], "qty": p["qty"],
+             "unrealized": float(p.get("unrealized_pl") or 0.0)} for p in pos]
+    journal("session_flatten_begin", positions=held, resting=len(orders),
+            reason="session exited (rc=%s) while not flat" % os.environ.get("SESSION_RC", "?"))
+    result = aio.flatten_all(verbose=False)
+    print("  ", result)
+    # read back what the flatten actually paid, rather than what it intended to
+    fills = []
+    try:
+        recent = aio.req("GET", "%s/v2/orders" % aio.TRADING,
+                         params={"status": "closed", "limit": 50, "direction": "desc"})
+        wanted = {h["symbol"] for h in held}
+        for o in recent:
+            if o.get("symbol") in wanted and o.get("filled_qty") not in (None, "0"):
+                fills.append({"symbol": o["symbol"], "side": o["side"],
+                              "qty": o["filled_qty"], "price": o.get("filled_avg_price"),
+                              "at": o.get("filled_at")})
+                wanted.discard(o["symbol"])
+            if not wanted:
+                break
+    except Exception as e:          # never let bookkeeping block the flatten
+        journal("session_flatten_unrecorded", error=str(e))
+    journal("session_flatten_done", fills=fills, result=str(result))
 PY
 exit $RC
