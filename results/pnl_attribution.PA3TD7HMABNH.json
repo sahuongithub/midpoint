@@ -1,0 +1,16 @@
+{
+ "date": "2026-09-02",
+ "account": "PA3TD7HMABNH",
+ "equity": 96659.41,
+ "broker_day_pnl": 10.8,
+ "agent": {
+  "fills": 8,
+  "net_cash": 11.0
+ },
+ "research": {
+  "fills": 0,
+  "net_cash": 0.0,
+  "contracts": []
+ },
+ "note": "agent fills are those whose order carries the agent's mp- client id, plus the supervisor's flatten fills, which close agent positions; everything else on the account is a research probe and is reported separately"
+}
