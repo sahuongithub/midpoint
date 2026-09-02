@@ -222,5 +222,35 @@ ck("a confirmed close IS journalled as closed", "closed" in evs2, str(evs2))
 ck("and the structure is dropped", len(b.s["open_structures"]) == 0,
    str(len(b.s["open_structures"])))
 
+
+# --- appended: escalation must not fire for a quiet market ------------------
+print("\n9. REGRESSION: refusing an unattractive market is not a malfunction")
+from risk_kernel import RiskKernel as _K
+ck("the account gate counts as a malfunction", _K.is_malfunction("G0-account"))
+ck("a fat-finger size counts as a malfunction", _K.is_malfunction("G7-fat-finger"))
+ck("a duplicate counts as a malfunction", _K.is_malfunction("G10-duplicate"))
+ck("the price collar does NOT", not _K.is_malfunction("G8-price-collar"))
+ck("the liquidity gate does NOT", not _K.is_malfunction("G9-liquidity"))
+ck("the trade-size cap does NOT", not _K.is_malfunction("G3-trade-size"))
+
+# a long run of market-class refusals must leave the streak at zero
+a = build_agent(tmp, et_hour=11)
+a.s["consecutive_rejects"] = 20
+A.build_vertical = lambda **kw: {"ok": True, "reason": "built",
+    "proposal": __import__("risk_kernel").Proposal(
+        strategy="put-credit-vertical", underlying="SPY",
+        legs=[__import__("risk_kernel").Leg("L","buy",1,True),
+              __import__("risk_kernel").Leg("S","sell",1)],
+        limit_price=0.03, max_loss_per_contract=0.97, contracts=1,
+        fair_value=0.09, quoted_width=0.02, dte=1),
+    "spot": 763.0, "expiry": "2026-09-02", "dte": 1,
+    "short": type("C",(),{"symbol":"S","strike":763.0})(),
+    "long": type("C",(),{"symbol":"L","strike":762.0})(),
+    "credit": 0.03, "width": 1.0, "max_loss_per_contract": 97.0,
+    "short_delta": 0.2, "greeks_source": "ours"}
+r = a.run_cycle()
+ck("a price-collar refusal resets the streak rather than growing it",
+   a.s["consecutive_rejects"] == 0, "streak=%d after %s" % (a.s["consecutive_rejects"], r))
+
 print("\n%s" % ("ALL PASS" if not fails else "FAILURES: " + ", ".join(fails)))
 sys.exit(1 if fails else 0)

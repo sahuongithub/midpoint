@@ -286,13 +286,34 @@ class RiskKernel:
             return ("G12-clock", "no new 0DTE positions after %s ET"
                     % self.cfg.no_open_0dte_after_et)
 
+    # Refusals come in two kinds, and only one of them means anything is wrong.
+    #
+    # A run of refusals because the agent keeps proposing things it should not --
+    # the wrong account, an undefined risk, an absurd size -- is a malfunction, and
+    # that is what Knight's 97 unread warnings were. A run of refusals because the
+    # market is not offering a trade worth taking is the system working exactly as
+    # designed, and halting for it would stop a well-behaved agent on any quiet
+    # day. The first version counted both, and duly halted this agent for
+    # correctly declining trades whose credit was too thin.
+    MALFUNCTION_GATES = ("G0-account", "G2-defined-risk", "G7-fat-finger",
+                         "G10-duplicate", "G11-throttle", "sizing")
+
+    @classmethod
+    def is_malfunction(cls, gate: Optional[str]) -> bool:
+        """Does this refusal suggest the agent above is broken, rather than the
+        market being unattractive?"""
+        return bool(gate) and gate in cls.MALFUNCTION_GATES
+
     def g13_escalation(self, p, s):
         """Knight's system sent 97 warnings before the open and nobody acted.
-        Repeated refusals mean the agent above is malfunctioning, not unlucky."""
+
+        This counts only refusals that indicate a malfunction; see
+        MALFUNCTION_GATES above for why the distinction matters.
+        """
         if s.consecutive_rejects >= self.cfg.max_consecutive_rejects:
             return ("G13-escalation",
-                    "%d consecutive rejections: halting rather than continuing to refuse"
-                    % s.consecutive_rejects)
+                    "%d consecutive malfunction-class rejections: halting rather "
+                    "than continuing to refuse" % s.consecutive_rejects)
 
     GATES = ["g0_account", "g1_kill_switch", "g2_defined_risk", "g13_escalation",
              "g4_daily_loss", "g5_drawdown", "g12_clock", "g7_fat_finger",

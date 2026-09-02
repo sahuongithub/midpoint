@@ -417,7 +417,13 @@ class Agent:
                       reasons=d.reasons)
 
         if d.action == REJECT:
-            self.s["consecutive_rejects"] += 1; self._save_state()
+            # only a malfunction-class refusal counts toward the escalation halt;
+            # declining an unattractive market is the system working
+            if RiskKernel.is_malfunction(d.gate):
+                self.s["consecutive_rejects"] += 1
+            else:
+                self.s["consecutive_rejects"] = 0
+            self._save_state()
             return "rejected:%s" % d.gate
         self.s["consecutive_rejects"] = 0
 
