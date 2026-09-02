@@ -10,7 +10,7 @@ Every decision this agent made, published as it ran. Refusals included — espec
 |---|---|---|---|---|---|
 | **paper** | real order, real quote, simulated money | 284 | 5 | 5 | — |
 | **simulated** | dry run — no order left the machine | 24 | 2 | 1 | — |
-| **evaluation** | risk-kernel decision; no order implied | 160 | — | — | 139 |
+| **evaluation** | risk-kernel decision; no order implied | 165 | — | — | 144 |
 
 Refusals are counted from the risk kernel's own records only. The agent journals the same decision from its side, and counting both would double every one.
 
@@ -18,8 +18,8 @@ Refusals are counted from the risk kernel's own records only. The agent journals
 
 | Gate | Refusals |
 |---|---|
+| `G8-price-collar` | 60 |
 | `G13-escalation` | 57 |
-| `G8-price-collar` | 55 |
 | `G3-trade-size` | 22 |
 | `structure-no-credit` | 4 |
 | `G10-duplicate` | 1 |
@@ -47,12 +47,17 @@ This is **tamper-evident, not tamper-proof**. It shows the sequence has not been
 
 | | |
 |---|---|
-| Total records | 468 |
-| Chain head | `51ef406ee3e203e3` |
-| Last updated | 2026-09-01 16:12:33 ET |
+| Total records | 473 |
+| Chain head | `6a18068c281a5d0b` |
+| Last updated | 2026-09-02 16:12:22 ET |
 
 ## Most recent 40 decisions
 
+- `[evaluation]` 20:12:20 · put-credit-vertical · proposed 1 → **REJECT** 0 · gate `G8-price-collar`
+- `[evaluation]` 16:49:15 · put-credit-vertical · proposed 1 → **REJECT** 0 · gate `G8-price-collar`
+- `[evaluation]` 16:42:01 · put-credit-vertical · proposed 1 → **REJECT** 0 · gate `G8-price-collar`
+- `[evaluation]` 16:36:54 · put-credit-vertical · proposed 1 → **REJECT** 0 · gate `G8-price-collar`
+- `[evaluation]` 16:35:56 · put-credit-vertical · proposed 1 → **REJECT** 0 · gate `G8-price-collar`
 - `[paper]` 20:00:59 · `stop` 
 - `[paper]` 20:00:59 · `session_end` reason=reached 16:00 ET
 - `[paper]` 19:16:19 · `flatten` reason=past 15:15 ET
@@ -88,8 +93,3 @@ This is **tamper-evident, not tamper-proof**. It shows the sequence has not been
 - `[paper]` 18:19:25 · `outside_window` 
 - `[paper]` 18:17:50 · `outside_window` 
 - `[paper]` 18:16:23 · `outside_window` 
-- `[paper]` 18:14:58 · `outside_window` 
-- `[paper]` 18:13:34 · `outside_window` 
-- `[paper]` 18:12:27 · `outside_window` 
-- `[paper]` 18:11:21 · `outside_window` 
-- `[paper]` 18:09:57 · `outside_window` 
