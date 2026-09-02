@@ -192,5 +192,35 @@ _d = _k.evaluate(_p, _s)
 ck("the pinned account is NOT refused by the account gate", _d.gate != "G0-account",
    str(_d.gate))
 
+
+# --- appended: a submitted close is not a closed position -------------------
+print("\n8. REGRESSION: a close that does not fill must not be reported as closed")
+
+class UnfilledExec(FakeExec):
+    """Accepts the close order but the position stays open at the broker."""
+    def close_vertical(self, spread, n, debit, seq=None):
+        self.closed.append((spread.short_symbol, n, debit))
+        return {"id": "order-that-never-fills"}
+
+a = build_agent(tmp, positions=LEGS, structures=[S1], close_price=0.05)  # 75% captured
+a.exec = UnfilledExec(positions=LEGS)
+a._confirm_closed = lambda order, st, wait_s=0: False      # broker still holds it
+a.run_cycle()
+evs = [e for e, _ in a.events]
+ck("it does not journal 'closed'", "closed" not in evs, str(evs))
+ck("it journals 'close_unfilled' instead", "close_unfilled" in evs, str(evs))
+ck("and keeps the structure so it is still managed",
+   len(a.s["open_structures"]) == 1, str(len(a.s["open_structures"])))
+
+# and when the broker DOES report it gone, the close is believed
+b = build_agent(tmp, positions=LEGS, structures=[S1], close_price=0.05)
+b.exec = UnfilledExec(positions=LEGS)
+b._confirm_closed = lambda order, st, wait_s=0: True
+b.run_cycle()
+evs2 = [e for e, _ in b.events]
+ck("a confirmed close IS journalled as closed", "closed" in evs2, str(evs2))
+ck("and the structure is dropped", len(b.s["open_structures"]) == 0,
+   str(len(b.s["open_structures"])))
+
 print("\n%s" % ("ALL PASS" if not fails else "FAILURES: " + ", ".join(fails)))
 sys.exit(1 if fails else 0)

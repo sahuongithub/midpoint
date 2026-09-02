@@ -188,6 +188,35 @@ class Agent:
             return None
         return None
 
+    def _confirm_closed(self, order, st, wait_s: float = 12.0) -> bool:
+        """Did the close actually fill? Cancel it if not.
+
+        A resting close that never fills is worse than one that is rejected: the
+        rejection is visible, while the resting order quietly leaves the position
+        open and the agent believing otherwise. So we wait briefly, and if it has
+        not filled we cancel it -- leaving no stray order to fill later against a
+        structure we may have re-priced in the meantime.
+        """
+        if self.dry_run:
+            return True
+        oid = (order or {}).get("id") or (order or {}).get("order_id")
+        deadline = time.time() + wait_s
+        while time.time() < deadline:
+            try:
+                held = {p.get("symbol") for p in
+                        aio.req("GET", "%s/v2/positions" % aio.TRADING)}
+            except Exception:
+                return False
+            if st["short"] not in held:
+                return True                      # the broker no longer holds it
+            time.sleep(1.5)
+        if oid:
+            try:
+                aio.req("DELETE", "%s/v2/orders/%s" % (aio.TRADING, oid))
+            except Exception:
+                pass
+        return False
+
     def manage_positions(self, broker_positions):
         """Reconcile recorded structures against the broker, then close anything that
         has reached its profit target.
@@ -217,8 +246,22 @@ class Agent:
                 spread = VerticalSpread(short_symbol=st["short"], long_symbol=st["long"],
                                         width=st["width"], underlying=self.cfg.underlying)
                 try:
-                    self.exec.close_vertical(spread, st["contracts"], debit,
-                                             seq=self.s["seq"])
+                    r = self.exec.close_vertical(spread, st["contracts"], debit,
+                                                 seq=self.s["seq"])
+                    # A submitted close is not a closed position. Declaring it
+                    # closed on submission drops the structure from local state
+                    # while the order is still resting unfilled -- the agent then
+                    # reports a profit it has not realised and stops managing a
+                    # position it still holds. The broker is the truth here as
+                    # everywhere else, so confirm the fill before believing it.
+                    if not self._confirm_closed(r, st):
+                        self._journal("close_unfilled", short=st["short"],
+                                      debit=debit, captured_frac=round(frac, 3),
+                                      note=("close did not fill at the conservative "
+                                            "price; keeping the structure and "
+                                            "retrying next cycle"))
+                        alive.append(st)
+                        continue
                     self._journal("closed", short=st["short"], credit=st["credit"],
                                   debit=debit, captured=round(captured, 4),
                                   captured_frac=round(frac, 3),
