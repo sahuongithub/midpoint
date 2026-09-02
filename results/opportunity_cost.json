@@ -1,10 +1,10 @@
 {
- "generated": "2026-09-01T20:12:33.203506+00:00",
+ "generated": "2026-09-02T20:12:22.262035+00:00",
  "journal": "/Users/sahu/midpoint/docs/risk_decisions.jsonl",
- "evaluations": 160,
+ "evaluations": 165,
  "passes": 21,
  "shrinks": 0,
- "refusals": 139,
+ "refusals": 144,
  "priceable": 138,
  "settled": 138,
  "pending": 0,

@@ -1,89 +1,89 @@
 {
- "source": "spread_curve.2026-09-01.jsonl",
- "samples": 302,
- "observations": 1779,
+ "source": "spread_curve.2026-09-02.jsonl",
+ "samples": 355,
+ "observations": 2097,
  "by_expiry": {
-  "2026-09-01": {
-   "buckets": {
-    "09:30-10:00": {
-     "n": 8,
-     "median_width": 0.01
-    },
-    "10:00-11:00": {
-     "n": 57,
-     "median_width": 0.01
-    },
-    "11:00-12:00": {
-     "n": 53,
-     "median_width": 0.01
-    },
-    "12:00-13:00": {
-     "n": 52,
-     "median_width": 0.01
-    },
-    "13:00-14:00": {
-     "n": 50,
-     "median_width": 0.01
-    },
-    "14:00-15:00": {
-     "n": 31,
-     "median_width": 0.01
-    },
-    "15:00-15:30": {
-     "n": 23,
-     "median_width": 0.01
-    },
-    "15:30-16:00": {
-     "n": 24,
-     "median_width": 0.01
-    }
-   },
-   "median_open": 0.01,
-   "median_window": 0.01,
-   "median_flatten": 0.01,
-   "p_open_vs_window": 0.5928547268350323,
-   "p_window_vs_flatten": 0.38414483426615176
-  },
   "2026-09-02": {
    "buckets": {
     "09:30-10:00": {
-     "n": 8,
+     "n": 14,
      "median_width": 0.02
     },
     "10:00-11:00": {
-     "n": 57,
-     "median_width": 0.02
+     "n": 58,
+     "median_width": 0.01
     },
     "11:00-12:00": {
-     "n": 53,
+     "n": 50,
      "median_width": 0.01
     },
     "12:00-13:00": {
-     "n": 52,
-     "median_width": 0.02
+     "n": 54,
+     "median_width": 0.01
     },
     "13:00-14:00": {
-     "n": 50,
-     "median_width": 0.02
+     "n": 58,
+     "median_width": 0.01
     },
     "14:00-15:00": {
-     "n": 31,
-     "median_width": 0.02
+     "n": 58,
+     "median_width": 0.01
     },
     "15:00-15:30": {
-     "n": 23,
-     "median_width": 0.02
+     "n": 29,
+     "median_width": 0.01
     },
     "15:30-16:00": {
-     "n": 24,
-     "median_width": 0.0155
+     "n": 29,
+     "median_width": 0.01
     }
    },
    "median_open": 0.02,
+   "median_window": 0.01,
+   "median_flatten": 0.01,
+   "p_open_vs_window": 0.046921001938155,
+   "p_window_vs_flatten": 0.09057566687183649
+  },
+  "2026-09-03": {
+   "buckets": {
+    "09:30-10:00": {
+     "n": 14,
+     "median_width": 0.035
+    },
+    "10:00-11:00": {
+     "n": 58,
+     "median_width": 0.02
+    },
+    "11:00-12:00": {
+     "n": 50,
+     "median_width": 0.02
+    },
+    "12:00-13:00": {
+     "n": 54,
+     "median_width": 0.02
+    },
+    "13:00-14:00": {
+     "n": 58,
+     "median_width": 0.02
+    },
+    "14:00-15:00": {
+     "n": 58,
+     "median_width": 0.02
+    },
+    "15:00-15:30": {
+     "n": 29,
+     "median_width": 0.01
+    },
+    "15:30-16:00": {
+     "n": 29,
+     "median_width": 0.02
+    }
+   },
+   "median_open": 0.035,
    "median_window": 0.02,
-   "median_flatten": 0.02,
-   "p_open_vs_window": 0.9368613147799938,
-   "p_window_vs_flatten": 0.047756044702835766
+   "median_flatten": 0.01,
+   "p_open_vs_window": 0.2368712607558029,
+   "p_window_vs_flatten": 0.13387501047291617
   }
  }
 }
