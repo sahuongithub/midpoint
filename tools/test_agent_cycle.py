@@ -158,5 +158,39 @@ r = a.run_cycle()
 ck("returns outside_window", r == "outside_window", r)
 ck("still closed the position that hit its target", len(a.exec.closed) == 1)
 
+# --- appended: the account pin must survive refactors -----------------------
+print("\n7. REGRESSION: a pinned session authorises its own account")
+import subprocess as _sp, json as _json, os as _os
+_env = dict(_os.environ, MIDPOINT_ALLOWED_ACCOUNT="PA_PINNED_TEST")
+_code = (
+    "import os,sys,json;sys.path.insert(0,'tools');"
+    "from risk_kernel import RiskConfig;"
+    "r=RiskConfig(**json.load(open('config/risk.json')));"
+    "a=os.environ.get('MIDPOINT_ALLOWED_ACCOUNT');"
+    "import agent;"                      # main() is where the pin is applied
+    "src=open('tools/agent.py').read();"
+    "print('PIN' if 'risk.allowed_account = allowed' in src else 'MISSING')"
+)
+_out = _sp.run([sys.executable, "-c", _code], capture_output=True, text=True,
+               env=_env, cwd=_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+ck("agent.py still applies MIDPOINT_ALLOWED_ACCOUNT to the risk config",
+   "PIN" in _out.stdout, _out.stdout.strip() + _out.stderr[-200:])
+
+# and the kernel must actually let that account through
+from risk_kernel import RiskKernel as _RK, RiskConfig as _RC, AccountState as _AS, Proposal as _P, Leg as _L
+_cfg = _RC(**json.load(open(os.path.join(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))), "config", "risk.json"))))
+_cfg.allowed_account = _cfg.competition_account
+_k = _RK(_cfg, journal_path=os.path.join(tmp, "pin.jsonl"))
+_p = _P(strategy="put-credit-vertical", underlying="SPY",
+        legs=[_L("L", "buy", 1, True), _L("S", "sell", 1)],
+        limit_price=0.13, max_loss_per_contract=0.87, contracts=1,
+        fair_value=0.13, quoted_width=0.02, dte=1)
+_s = _AS(account_number=_cfg.competition_account, equity=100000,
+         peak_equity=100000, day_start_equity=100000)
+_d = _k.evaluate(_p, _s)
+ck("the pinned account is NOT refused by the account gate", _d.gate != "G0-account",
+   str(_d.gate))
+
 print("\n%s" % ("ALL PASS" if not fails else "FAILURES: " + ", ".join(fails)))
 sys.exit(1 if fails else 0)

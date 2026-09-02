@@ -451,6 +451,15 @@ def main():
     a = ap.parse_args()
 
     risk = RiskConfig(**json.load(open(os.path.expanduser("~/midpoint/config/risk.json"))))
+
+    # A session may be pinned to one account. The kernel then treats that as an
+    # allowlist and refuses every other account, which is also what authorises the
+    # judged account to trade at all -- without it the first gate falls back to its
+    # blocklist and refuses the very account the session exists to trade.
+    allowed = os.environ.get("MIDPOINT_ALLOWED_ACCOUNT")
+    if allowed:
+        risk.allowed_account = allowed
+
     cfg = AgentConfig(cycle_seconds=a.cycle_seconds, contracts=a.contracts)
     agent = Agent(cfg, risk, dry_run=not a.live,
                   risk_journal=_scoped("risk_decisions", ".jsonl"))
