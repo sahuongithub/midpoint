@@ -41,7 +41,7 @@ from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import alpaca_io as aio
-import signal as sig
+import regime as sig
 from structure import build_vertical
 from risk_kernel import RiskKernel, RiskConfig, AccountState, REJECT, SHRINK
 from executor import Executor, VerticalSpread, ExecError

@@ -1,5 +1,5 @@
 """
-signal.py -- the regime gate. Decides whether short-premium conditions are on.
+regime.py -- the regime gate. Decides whether short-premium conditions are on.
 
 THE EVIDENCE
 ------------
@@ -11,6 +11,17 @@ information, predicting the excess returns of synthetic S&P 500 variance swaps, 
 futures, and S&P 500 straddles for all maturities and to the exclusion of the rest of
 the term structure." The LEVEL of implied volatility carries no such information,
 which is why IV rank is not used anywhere in this project.
+
+WHY THIS FILE IS NOT CALLED signal.py
+------------------------------------
+It was, and that was a latent fault. Python resolves a script's own directory before
+the standard library, so a module named signal.py here became THE signal module for
+the whole process -- including for stdlib machinery that quietly depends on it.
+subprocess reaches for signal.SIGKILL when it terminates a child, found this file
+instead, and the agent lost a cycle to
+AttributeError: module 'signal' has no attribute 'SIGKILL'.
+The regime gate had nothing to do with it. Nothing in this project may take the name
+of a standard-library module.
 
 HONEST LIMITATION
 -----------------
