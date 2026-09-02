@@ -31,7 +31,15 @@ if ! /usr/bin/python3 "$ROOT/tools/preflight.py" --expect "$EXPECT" \
 fi
 
 echo "[$STAMP] starting live session: $*" >> "$LOG/cron.log"
-/usr/bin/python3 "$ROOT/tools/agent.py" "$@" >> "$LOG/session.$STAMP.log" 2>&1
+/usr/bin/python3 "$ROOT/tools/agent.py" "$@" >> "$LOG/session.$STAMP.log" 2>&1 &
+AGENT_PID=$!
+# Record the PYTHON pid, not this shell's. A pid file naming the wrapper is worse
+# than none: killing it leaves the agent running while the file disappears, and
+# the next start sees a free slot and launches a second agent onto the same
+# account -- two sessions sharing one state file on the account that matters.
+mkdir -p "$ROOT/ops/run"
+[ -n "${EXPECT:-}" ] && echo "$AGENT_PID" > "$ROOT/ops/run/agent.$EXPECT.pid"
+wait $AGENT_PID
 RC=$?
 echo "[$STAMP] session exited $RC" >> "$LOG/cron.log"
 

@@ -122,7 +122,8 @@ else
   MIDPOINT_ALLOWED_ACCOUNT="$EXPECT" MIDPOINT_ENV="$ENVFILE" \
     nohup ./ops/run_session.sh "$ET_DATE" --live --cycle-seconds 60 --until-et 16:00 \
     > "$LOG/session.$STAMP.log" 2>&1 &
-  echo $! > "$PIDFILE"
+  # run_session.sh writes the pid file itself, naming the python process rather
+  # than this wrapper, so a later stop actually stops the agent
   echo "  agent started        -> trades until 16:00 ET, flattens at 15:15"
 fi
 
