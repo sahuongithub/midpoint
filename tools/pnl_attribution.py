@@ -145,7 +145,14 @@ def main(argv):
     print("  %-34s %8d %+14.2f" % ("what the broker screen shows", len(fills),
                                    cash(fills)))
     print()
-    print("  broker's own day figure: $%+.2f" % (eq - le))
+    # last_equity is always YESTERDAY-to-now. Printing it under a past date's
+    # heading labels today's move as that day's, which is the kind of quiet
+    # mislabelling this whole tool exists to prevent.
+    if day == et_today():
+        print("  broker's own day figure: $%+.2f" % (eq - le))
+    else:
+        print("  (the broker's day figure is only meaningful for today; the fills")
+        print("   above are %s's, read from the order history)" % day)
 
     if by_research:
         syms = sorted({f["symbol"] for f in by_research})
