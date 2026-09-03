@@ -1,11 +1,11 @@
 {
  "date": "2026-09-02",
  "account": "PA32CGA2U1DY",
- "equity": 99998.8,
- "broker_day_pnl": -1.2,
+ "equity": 100004.7,
+ "broker_day_pnl": 4.7,
  "agent": {
-  "fills": 8,
-  "net_cash": -1.0
+  "fills": 12,
+  "net_cash": 5.0
  },
  "research": {
   "fills": 0,

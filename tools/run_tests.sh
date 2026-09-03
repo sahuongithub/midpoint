@@ -24,6 +24,7 @@ run "refusal pricing"            test_opportunity_cost.py
 run "assignment-risk monitor"    test_assignment_risk.py
 run "agent cycle sequencing"     test_agent_cycle.py
 run "P&L attribution"           test_pnl_attribution.py
+run "limit ladder"              test_limit_ladder.py
 echo "----------------------------------------------------------------------"
 echo "  analyses recomputed from the recorded data (no network):"
 run "microprice vs mid"          microprice_study.py
