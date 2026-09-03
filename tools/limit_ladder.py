@@ -48,6 +48,15 @@ but the construction: one contract, a one-wide vertical, defined risk of at most
 on the research account only, flattened the moment it fills. The competition account is
 refused outright.
 
+NOT SHARING AN ACCOUNT CARELESSLY
+---------------------------------
+A probe that calls flatten_all() closes whatever the agent is holding, and this
+project has already made that mistake once, with the size ladder. So this one cleans
+up after itself and nothing else: it cancels only the client order ids it minted, and
+closes only the two legs it laddered. It also refuses to start against strikes the
+account already holds, and refuses to start at all while a research agent is running,
+because the safest way to share an account is not to.
+
     python3 tools/limit_ladder.py --passes 3 --wait 25
 """
 import argparse, json, os, random, sys, time
@@ -62,6 +71,9 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(HERE, "results", "limit_ladder.jsonl")
 
 RUNGS = [0.0, 0.25, 0.5, 0.75, 1.0]
+
+# every client order id this run has minted. Cleanup touches these and nothing else.
+MINE = set()
 
 
 def now():
@@ -92,16 +104,33 @@ def open_orders():
         return []
 
 
-def cleanup(reason):
-    """Never leave a resting order or a position behind, whatever went wrong."""
+def cancel_mine():
+    """Cancel resting orders this run submitted. Anything else on the account
+    belongs to somebody who did not ask us to touch it."""
     n = 0
     for o in open_orders():
-        if cancel(o.get("id")):
+        if o.get("client_order_id") in MINE and cancel(o.get("id")):
             n += 1
-    pos = aio.req("GET", "%s/v2/positions" % aio.TRADING)
-    if pos:
-        aio.flatten_all(verbose=False)
-    print("  cleanup (%s): cancelled %d resting, flattened %d positions" % (reason, n, len(pos)))
+    return n
+
+
+def close_legs(spread):
+    """Close only the two contracts we laddered, never the account."""
+    out = []
+    for sym in (spread.short_symbol, spread.long_symbol):
+        out.append(aio.flatten_symbol(sym, verbose=False))
+    return out
+
+
+def cleanup(spread, reason):
+    """Never leave OUR resting order or OUR position behind, whatever went wrong."""
+    n = cancel_mine()
+    held = [p for p in aio.req("GET", "%s/v2/positions" % aio.TRADING)
+            if p.get("symbol") in (spread.short_symbol, spread.long_symbol)]
+    if held:
+        close_legs(spread)
+    print("  cleanup (%s): cancelled %d of our orders, closed %d of our legs"
+          % (reason, n, len(held)))
 
 
 def run_rung(ex, spread, theta, short, long, seq, wait_s, spot):
@@ -130,6 +159,7 @@ def run_rung(ex, spread, theta, short, long, seq, wait_s, spot):
         rec.update(filled=None, error=str(e)[:200])
         return rec
     coid = sub["client_order_id"]
+    MINE.add(coid)
     o = ex.wait_for_fill(coid, timeout_s=wait_s)
     rec["waited_s"] = round(time.time() - t0, 1)
 
@@ -138,10 +168,11 @@ def run_rung(ex, spread, theta, short, long, seq, wait_s, spot):
         rec.update(filled=True, fill_credit=abs(fill),
                    fill_minus_limit=round(abs(fill) - limit, 4),
                    fill_minus_fair=round(abs(fill) - mid, 4))
-        # close it straight away; the probe is about entry, not about carrying risk
+        # close it straight away; the probe is about entry, not about carrying risk.
+        # Only our two legs -- flatten_all() here would close an agent's positions.
         time.sleep(1.0)
-        exit_note = aio.flatten_all(verbose=False)
-        rec["exit"] = str(exit_note)[:200]
+        rec["exit"] = [{"symbol": r["symbol"], "closed": r["positions_closed"],
+                        "clean": r["clean"]} for r in close_legs(spread)]
     else:
         # find and cancel whatever is resting under this client id
         killed = False
@@ -151,6 +182,24 @@ def run_rung(ex, spread, theta, short, long, seq, wait_s, spot):
         rec.update(filled=False, cancelled=killed,
                    status=(o or {}).get("status", "unfilled"))
     return rec
+
+
+def agent_running():
+    """A live agent on this account is a reason not to start, not a race to win."""
+    live = []
+    rundir = os.path.expanduser("~/midpoint/ops/run")
+    if not os.path.isdir(rundir):
+        return live
+    for f in os.listdir(rundir):
+        if not f.endswith(".pid"):
+            continue
+        try:
+            pid = int(open(os.path.join(rundir, f)).read().strip())
+            os.kill(pid, 0)
+            live.append(f)
+        except Exception:
+            pass
+    return live
 
 
 def main(argv):
@@ -163,17 +212,31 @@ def main(argv):
     ap.add_argument("--kind", default="put")
     ap.add_argument("--delta", type=float, default=0.20)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--force", action="store_true",
+                    help="run even though an agent is live on this account")
     a = ap.parse_args(argv)
 
     acct = aio.guard_not_competition()          # refuses the submission account
+    live = agent_running()
+    if live and not a.force:
+        print("  an agent is running (%s). The probe closes positions by symbol, and "
+              "a strike\n  it laddered is a strike the agent could open a minute "
+              "later. Refusing.\n  Run before the agent starts, or pass --force if "
+              "you know the account is idle." % ", ".join(live))
+        return 2
     print("=" * 74)
     print("  WHAT A SPREAD HAS TO GIVE UP TO FILL   account %s" % acct["account_number"])
     print("=" * 74)
 
+    held = {p["symbol"] for p in aio.req("GET", "%s/v2/positions" % aio.TRADING)}
+    if held:
+        print("  account already holds %d contracts; excluding them from the ladder"
+              % len(held))
     built = S.build_vertical(underlying=a.underlying, min_dte=a.min_dte,
                              max_dte=a.max_dte, kind=a.kind,
                              target_short_delta=a.delta, width_strikes=1.0,
-                             max_quoted_width=1.00, contracts=1)
+                             max_quoted_width=1.00, contracts=1,
+                             exclude_symbols=held)
     if not built.get("ok"):
         print("  could not build a structure: %s" % built.get("reason"))
         return 1
@@ -221,7 +284,7 @@ def main(argv):
     except KeyboardInterrupt:
         print("\n  interrupted")
     finally:
-        cleanup("end of run")
+        cleanup(spread, "end of run")
 
     print("\n  %d rungs written to %s" % (len(rows), OUT))
     return 0

@@ -39,6 +39,17 @@ ck("the guard runs before the structure is built",
 ck("cleanup runs in a finally block", "finally:" in src and "cleanup(" in src)
 ck("only ever one contract", "submit_vertical(spread, 1," in src)
 
+print("\n2b. REGRESSION: a probe must not flatten an account it shares")
+# the size ladder made exactly this mistake once: an account-wide flatten_all() in a
+# research probe closes whatever the agent is holding.
+ck("no account-wide flatten_all call survives in the probe",
+   "aio.flatten_all(" not in src)
+ck("it closes by symbol instead", "flatten_symbol(" in src)
+ck("it cancels only ids it minted", "client_order_id\") in MINE" in src)
+ck("it registers each id it submits", "MINE.add(coid)" in src)
+ck("it refuses to start while an agent is live", "agent_running()" in src and "--force" in src)
+ck("it excludes strikes the account already holds", "exclude_symbols=held" in src)
+
 print("\n3. Wilson interval, because six attempts is not a percentage")
 p, lo, hi = A.wilson(3, 6)
 ck("a 3-of-6 rate centres on a half", abs(p - 0.5) < 1e-9)
