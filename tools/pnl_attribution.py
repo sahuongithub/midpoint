@@ -29,24 +29,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import alpaca_io as aio
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-def _journal_path():
-    """The books are per-account, and so is this. Reading the unscoped journal while
-    attributing the judged account reported the agent as having traded nothing."""
-    acct = os.environ.get("MIDPOINT_ALLOWED_ACCOUNT")
-    stem = "agent.%s" % acct if acct else "agent"
-    return os.path.expanduser("~/midpoint/docs/%s.jsonl" % stem)
+import books
 
-
-AGENT_JOURNAL = _journal_path()
-def _out_path():
-    """Per-account, like the books. A single shared file meant whichever account ran
-    last silently overwrote the other's attribution."""
-    acct = os.environ.get("MIDPOINT_ALLOWED_ACCOUNT")
-    stem = "pnl_attribution.%s" % acct if acct else "pnl_attribution"
-    return os.path.join(HERE, "results", "%s.json" % stem)
-
-
-OUT = _out_path()
+_journal_path = books.journal          # kept as a name for the tests
+AGENT_JOURNAL = books.journal()
+_out_path = books.attribution
+OUT = books.attribution()
 
 
 def et_today():

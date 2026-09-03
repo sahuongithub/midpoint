@@ -71,5 +71,32 @@ ck("with no account pinned it falls back to the unscoped name",
    P._journal_path().endswith("agent.jsonl"))
 
 os.remove(jpath)
+print("\n5. REGRESSION: nobody re-implements where the books live")
+import books, glob, re as _re
+os.environ["MIDPOINT_ALLOWED_ACCOUNT"] = "PAZZZ"
+ck("books.journal names the account", books.journal().endswith("agent.PAZZZ.jsonl"))
+ck("books.state names the account", books.state().endswith("agent_state.PAZZZ.json"))
+ck("books.risk_decisions names the account",
+   books.risk_decisions().endswith("risk_decisions.PAZZZ.jsonl"))
+ck("books.attribution names the account",
+   books.attribution().endswith("pnl_attribution.PAZZZ.json"))
+os.environ.pop("MIDPOINT_ALLOWED_ACCOUNT")
+ck("unpinned falls back to the bare name", books.journal().endswith("agent.jsonl"))
+
+# watch.py showed a previous day's session while its header said LIVE, because it
+# built this path itself. No tool may hardcode a books path again.
+here = os.path.dirname(os.path.abspath(books.__file__))
+offenders = []
+for f in ("watch.py", "pnl_attribution.py", "agent.py"):
+    src = open(os.path.join(here, f)).read()
+    for bad in ('docs/agent.jsonl', 'docs/risk_decisions.jsonl',
+                'docs/agent_state.json', 'results/pnl_attribution.json'):
+        if bad in src:
+            offenders.append("%s hardcodes %s" % (f, bad))
+ck("no tool hardcodes an unscoped books path", not offenders, "; ".join(offenders))
+ck("every one of them imports books",
+   all("import books" in open(os.path.join(here, f)).read()
+       for f in ("watch.py", "pnl_attribution.py", "agent.py")))
+
 print("\n%s" % ("ALL PASS" if not fails else "FAILURES: " + ", ".join(fails)))
 sys.exit(1 if fails else 0)

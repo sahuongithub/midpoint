@@ -15,9 +15,13 @@ Nothing here is reconstructed or prettified after the fact.
 import json, os, sys, time
 from datetime import datetime, timedelta, timezone
 
-AGENT = os.path.expanduser("~/midpoint/docs/agent.jsonl")
-RISK = os.path.expanduser("~/midpoint/docs/risk_decisions.jsonl")
-HALT = os.path.expanduser("~/midpoint/HALT")
+# The books are per-account. Reading the unscoped journal here showed a stale
+# session from a previous day while the header claimed LIVE -- see books.py.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import books
+AGENT = books.journal()
+RISK = books.risk_decisions()
+HALT = books.HALT
 
 C = dict(r="\033[0m", b="\033[1m", dim="\033[2m",
          red="\033[38;5;203m", grn="\033[38;5;114m", yel="\033[38;5;179m",

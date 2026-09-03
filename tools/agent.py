@@ -46,19 +46,12 @@ from structure import build_vertical
 from risk_kernel import RiskKernel, RiskConfig, AccountState, REJECT, SHRINK
 from executor import Executor, VerticalSpread, ExecError
 
-def _scoped(name: str, ext: str) -> str:
-    """One set of books per account.
+import books
 
-    State and journals are per-account facts: open structures, the equity peak the
-    drawdown gate measures from, the day's starting equity. Two sessions on two
-    accounts sharing one state file would overwrite each other's positions and
-    anchor each other's risk limits to the wrong equity. Naming the files after the
-    account keeps the judged record and the research record entirely separate, which
-    is also what makes the judged equity curve readable.
-    """
-    acct = os.environ.get("MIDPOINT_ALLOWED_ACCOUNT")
-    stem = "%s.%s" % (name, acct) if acct else name
-    return os.path.expanduser("~/midpoint/docs/%s%s" % (stem, ext))
+# One set of books per account -- the rule and the reasoning now live in books.py,
+# because three other files re-implemented it and two of them got it wrong.
+def _scoped(name: str, ext: str) -> str:
+    return books.scoped(name, ext)
 
 
 STATE_PATH = _scoped("agent_state", ".json")
