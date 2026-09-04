@@ -20,3 +20,7 @@ ops/logs/
 # local settlement lookups
 results/settlement_cache.json
 ops/run/
+
+# drafting scratch for posts and form fields: not part of the project
+social/
+video/_*.png

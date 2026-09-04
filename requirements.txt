@@ -1,16 +1,15 @@
-# There are none, and that is deliberate.
+# The agent, the risk kernel and every analysis in this repository import only the
+# Python standard library. The statistics they report -- Student's t, the incomplete
+# beta function, bootstrap and Wilson intervals, Spearman and sign tests -- are
+# implemented in tools/statlib.py and checked against closed-form values rather than
+# pulled in from SciPy. Market data goes over urllib. There is no dataframe library,
+# no model, and no vector store.
 #
-# Every module in tools/ imports only the Python standard library. The statistics
-# this project reports -- Student's t, the incomplete beta function, bootstrap
-# intervals, Wilson intervals, Spearman and sign tests -- are implemented in
-# tools/statlib.py and verified against closed-form values, rather than pulled in
-# from SciPy. Market data goes over urllib. There is no dataframe library, no
-# model, and no vector store.
-#
-# This file previously listed streamlit and pandas. Nothing ever imported either;
-# they were scaffolding from a shape this project did not end up taking, and a
-# dependency you do not use is a claim you cannot support.
-#
-# To run everything:
-#     python3 tools/run_tests.sh      # the full suite, offline
+#     python3 tools/run_tests.sh      # the full suite, offline, no installs
 #     python3 tools/agent.py --help   # the trading loop
+#
+# The two packages below are needed ONLY by app.py, an optional local operator view.
+# Nothing else in the repository imports them, and the published application at
+# sahuongithub.github.io/midpoint is static HTML that needs neither.
+streamlit>=1.38
+pandas>=2.0
