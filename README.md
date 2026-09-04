@@ -3,6 +3,9 @@
 An execution-quality report card for options traders, and an autonomous agent that
 trades to earn a good one.
 
+**Submission:** [one-page write-up](WRITEUP.md) — AI logic, risk gates, and Alpaca
+infrastructure. Alpaca paper trading account **`PA32CGA2U1DY`**.
+
 ## The problem
 
 Retail options traders lose more to the spread than to being wrong. Bryzgalova,
