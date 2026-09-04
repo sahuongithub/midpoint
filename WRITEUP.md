@@ -30,6 +30,38 @@ ourselves, plus an agent that trades under the discipline the measurements imply
 
 ---
 
+## The one page
+
+*The three things the brief asks for, on one screen. Everything below this is supporting detail.*
+
+**AI logic.** An autonomous agent, not a predictive model — and the distinction is deliberate.
+It runs a perception → decision → action loop roughly every 70 seconds: read the VIX term
+structure and the SPY option chain, build exactly one candidate structure, put it through a
+policy layer that can only ever refuse, and send it only if nothing objects. Permission comes
+from the *slope* of the volatility term structure (Johnson, *JFQA* 2017 — level carries no
+information, which is why IV rank appears nowhere here). Strike selection targets 0.20 delta with
+the loss capped by a long leg one strike further out. Positions close at 50% of credit captured
+and are flattened at 15:15 ET. The agent claims **no forecasting edge**; its intelligence is in
+what it declines, and it declines **96%** of what it considers.
+
+**Risk gates.** Fourteen gates between the strategy and the broker, in fixed order, any one of
+which can veto and three of which shrink instead. They map clause-by-clause onto **SEC Rule
+15c3-5**, and G13 encodes Knight Capital directly. The kernel is pure — no network, no clock —
+so all fourteen are covered by 23 unit tests plus **12 invariants checked against 10,000 random
+account states**. Uniquely, every refusal is journalled with the market snapshot behind it and
+later **settled at expiry**, so we can price what saying no was worth: **138 refusals, net
++$2,491**.
+
+**Alpaca infrastructure implementation.** Everything runs live on the Alpaca paper API — chain
+discovery, per-leg option snapshots, underlying trades and bars, positions, activities and the
+market clock. Orders go as a single **atomic `mleg`** order, so a vertical can never half-fill
+into an uncovered short. **No backtest exists anywhere in this project.** We also use the paper
+engine as a measurement instrument: six probes with limits spanning $1.00 filled within $0.01,
+proving it fills marketable orders at the NBBO — a free ground-truth oracle, and the thing that
+made the whole report card possible.
+
+---
+
 ## What is actually new here
 
 1. **An options execution report card, because the law does not require one.** Not modelled —
@@ -48,7 +80,9 @@ ourselves, plus an agent that trades under the discipline the measurements imply
 
 ---
 
-## 1. Decision logic
+# Supporting detail
+
+## 1. AI logic
 
 One loop, roughly every 70 seconds. **Every stage can only ever say *no*.**
 
@@ -116,7 +150,7 @@ rate. That ratio *is* the product.
 
 ---
 
-## 3. Alpaca infrastructure
+## 3. Alpaca infrastructure implementation
 
 Everything runs against the Alpaca paper API. **No backtest appears anywhere in this project.**
 Every number came from a live account placing real orders.
