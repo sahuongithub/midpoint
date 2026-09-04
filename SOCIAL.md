@@ -12,31 +12,31 @@ Links to use:
 
 ## Post 1 — the finding (lead with this one)
 
-> Two real SPY put contracts, quoted minutes apart.
+> Two real SPY puts, quoted minutes apart.
 >
 > One costs $1 to get in and out of.
 > The other costs $306.
 >
-> Nothing on a broker screen tells you which one you just clicked.
+> Nothing on your broker screen tells you which one you just clicked.
 >
 > So I built the receipt nobody sends you 👇
 > https://sahuongithub.github.io/midpoint/
 >
-> @lablabai @AlpacaHQ #AlpacaHackathon
+> @lablabai @AlpacaHQ
 
 ---
 
 ## Post 2 — the legal gap
 
-> Why does no options execution data exist?
+> Why is there no options execution data?
 >
-> Rule 605 forces brokers to publish execution quality — but only for "NMS stocks".
+> Rule 605 makes brokers publish execution quality — for "NMS stocks".
 >
 > 17 CFR 242.600 defines that as "any NMS security other than an option."
 >
 > One word. Every option, exempt.
 >
-> Built on @AlpacaHQ paper API for @lablabai's hackathon.
+> Built on @AlpacaHQ paper API for @lablabai
 
 ---
 
@@ -57,15 +57,15 @@ Links to use:
 
 ## Post 4 — a setback, honestly (this is what "build in public" actually asks for)
 
-> Debugging story from today.
+> Debugging story.
 >
-> My live monitor said "LIVE" and showed a session from the previous day. It was reading
-> the wrong journal file.
+> My live monitor said "LIVE" while showing yesterday's session. It was reading the
+> wrong file.
 >
-> I found it 20 minutes before filming a demo where I'd have pointed at it and said
-> "this is happening right now."
+> Found it 20 min before filming a demo where I'd have pointed at it and said "this is
+> happening right now."
 >
-> Run the command. Never trust it.
+> Run it. Never trust it.
 >
 > @lablabai @AlpacaHQ
 
